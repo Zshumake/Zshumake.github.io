@@ -4,252 +4,563 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShuHub - PM&R Training Tools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg: #0f1117;
-            --card: #1a1d27;
-            --card-hover: #222633;
-            --border: #2a2e3d;
-            --text: #e4e6ed;
-            --text-muted: #8b8fa3;
-            --accent: #6c8aff;
-            --accent-glow: rgba(108, 138, 255, 0.15);
+            --bg: #0a0e1a;
+            --bg-grid: rgba(30, 80, 120, 0.07);
+            --card: rgba(12, 20, 35, 0.85);
+            --card-hover: rgba(18, 30, 50, 0.95);
+            --card-border: rgba(40, 70, 110, 0.3);
+            --text: #d0dce8;
+            --text-muted: #5a7a95;
+            --text-bright: #e8f0f8;
+            --green: #00e676;
+            --green-dim: rgba(0, 230, 118, 0.15);
+            --green-glow: rgba(0, 230, 118, 0.3);
+            --amber: #ffb300;
+            --amber-dim: rgba(255, 179, 0, 0.15);
+            --red: #ff3d00;
+            --cyan: #00e5ff;
+            --cyan-dim: rgba(0, 229, 255, 0.1);
+            --blue: #448aff;
+            --blue-dim: rgba(68, 138, 255, 0.15);
+            --purple: #b388ff;
+            --purple-dim: rgba(179, 136, 255, 0.15);
+            --teal: #1de9b6;
+            --teal-dim: rgba(29, 233, 182, 0.15);
+            --pink: #ff80ab;
+            --pink-dim: rgba(255, 128, 171, 0.15);
+            --orange: #ff9100;
+            --orange-dim: rgba(255, 145, 0, 0.15);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .header {
-            text-align: center;
-            padding: 3rem 1.5rem 2rem;
+        /* ECG grid background */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(rgba(30, 80, 120, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 80, 120, 0.03) 1px, transparent 1px);
+            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
+        .bg-gradient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(0, 60, 120, 0.2) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 50%, rgba(0, 100, 80, 0.08) 0%, transparent 40%);
         }
 
-        .header h1 span {
-            color: var(--accent);
-        }
-
-        .header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            max-width: 500px;
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 0 1.5rem;
         }
 
+        /* Header with waveform */
+        header {
+            position: relative;
+            padding: 3.5rem 0 2rem;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .waveform-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            max-width: 800px;
+            height: 120px;
+            opacity: 0.15;
+        }
+
+        .waveform-line {
+            fill: none;
+            stroke: var(--green);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 6px var(--green-glow));
+        }
+
+        @keyframes trace {
+            0% { stroke-dashoffset: 2000; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .waveform-line {
+            stroke-dasharray: 2000;
+            animation: trace 4s linear infinite;
+        }
+
+        .waveform-line:nth-child(2) {
+            stroke: var(--cyan);
+            opacity: 0.5;
+            animation-delay: -1.5s;
+            stroke-width: 1.5;
+        }
+
+        .waveform-line:nth-child(3) {
+            stroke: var(--amber);
+            opacity: 0.3;
+            animation-delay: -3s;
+            stroke-width: 1;
+        }
+
+        header h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--text-bright);
+            position: relative;
+        }
+
+        header h1 span {
+            color: var(--green);
+            text-shadow: 0 0 20px var(--green-glow), 0 0 40px rgba(0, 230, 118, 0.1);
+        }
+
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .subtitle::before {
+            content: '> ';
+            color: var(--green);
+        }
+
+        /* Status bar */
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1rem 0 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green-glow);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .status-dot.amber { background: var(--amber); box-shadow: 0 0 6px rgba(255, 179, 0, 0.3); }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Card grid */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 1rem 1.5rem 3rem;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1px;
         }
 
+        /* Cards */
         .card {
+            position: relative;
             background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border: 1px solid var(--card-border);
             text-decoration: none;
             color: var(--text);
-            transition: all 0.2s ease;
+            padding: 1.5rem 1.5rem 1.5rem 1.75rem;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            position: relative;
+            gap: 0.4rem;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--card-accent, var(--green));
+            opacity: 0.6;
+            transition: opacity 0.3s, width 0.3s, box-shadow 0.3s;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent);
+            transition: left 0.6s ease;
         }
 
         .card:hover {
             background: var(--card-hover);
-            border-color: var(--accent);
-            box-shadow: 0 0 20px var(--accent-glow);
-            transform: translateY(-2px);
+            border-color: var(--card-accent, var(--green));
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3),
+                        inset 0 0 30px var(--card-glow, var(--green-dim));
         }
 
-        .card-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: var(--accent-glow);
+        .card:hover::before {
+            opacity: 1;
+            width: 4px;
+            box-shadow: 0 0 12px var(--card-accent, var(--green));
+        }
+
+        .card:hover::after {
+            left: 100%;
+        }
+
+        .card-header {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             margin-bottom: 0.25rem;
-            color: var(--accent);
-            font-weight: 700;
-            font-size: 0.85rem;
         }
 
         .card-title {
-            font-size: 1.15rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
             font-weight: 600;
+            color: var(--text-bright);
+            letter-spacing: -0.01em;
+        }
+
+        .card-status {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--card-accent, var(--green));
+        }
+
+        .card-status-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 4px currentColor;
+            animation: pulse-dot 2s ease-in-out infinite;
         }
 
         .card-desc {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.4;
+            font-size: 0.82rem;
+            line-height: 1.5;
         }
 
-        .card-tag {
-            display: inline-block;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--accent);
-            background: var(--accent-glow);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             margin-top: 0.5rem;
-            width: fit-content;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
         }
 
+        .card-meta-tag {
+            padding: 0.15rem 0.4rem;
+            border: 1px solid var(--card-border);
+            border-radius: 2px;
+        }
+
+        /* Color variants */
+        .card[data-color="green"]  { --card-accent: var(--green);  --card-glow: var(--green-dim); }
+        .card[data-color="cyan"]   { --card-accent: var(--cyan);   --card-glow: var(--cyan-dim); }
+        .card[data-color="blue"]   { --card-accent: var(--blue);   --card-glow: var(--blue-dim); }
+        .card[data-color="purple"] { --card-accent: var(--purple); --card-glow: var(--purple-dim); }
+        .card[data-color="teal"]   { --card-accent: var(--teal);   --card-glow: var(--teal-dim); }
+        .card[data-color="pink"]   { --card-accent: var(--pink);   --card-glow: var(--pink-dim); }
+        .card[data-color="amber"]  { --card-accent: var(--amber);  --card-glow: var(--amber-dim); }
+        .card[data-color="orange"] { --card-accent: var(--orange); --card-glow: var(--orange-dim); }
+
+        /* Coming soon */
         .card.coming-soon {
-            opacity: 0.5;
+            opacity: 0.35;
             pointer-events: none;
         }
 
-        .card.coming-soon .card-tag {
-            color: var(--text-muted);
-            background: rgba(139, 143, 163, 0.1);
+        .card.coming-soon .card-status-dot {
+            animation: none;
+            opacity: 0.5;
         }
 
-        .footer {
+        /* Staggered entrance */
+        .card {
+            opacity: 0;
+            transform: translateY(12px);
+            animation: card-enter 0.4s ease forwards;
+        }
+
+        @keyframes card-enter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card:nth-child(1)  { animation-delay: 0.05s; }
+        .card:nth-child(2)  { animation-delay: 0.1s; }
+        .card:nth-child(3)  { animation-delay: 0.15s; }
+        .card:nth-child(4)  { animation-delay: 0.2s; }
+        .card:nth-child(5)  { animation-delay: 0.25s; }
+        .card:nth-child(6)  { animation-delay: 0.3s; }
+        .card:nth-child(7)  { animation-delay: 0.35s; }
+        .card:nth-child(8)  { animation-delay: 0.4s; }
+        .card:nth-child(9)  { animation-delay: 0.45s; }
+        .card:nth-child(10) { animation-delay: 0.5s; }
+        .card:nth-child(11) { animation-delay: 0.55s; }
+
+        .card.coming-soon {
+            animation-fill-mode: forwards;
+        }
+
+        .card.coming-soon {
+            animation-name: card-enter-dim;
+        }
+
+        @keyframes card-enter-dim {
+            to { opacity: 0.35; transform: translateY(0); }
+        }
+
+        /* Footer */
+        footer {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 0 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
             color: var(--text-muted);
-            font-size: 0.85rem;
-            border-top: 1px solid var(--border);
+            letter-spacing: 0.03em;
         }
 
-        @media (max-width: 640px) {
-            .header h1 { font-size: 1.8rem; }
+        footer::before {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 1px;
+            background: var(--card-border);
+            margin: 0 auto 1.5rem;
+        }
+
+        @media (max-width: 700px) {
+            header h1 { font-size: 2.2rem; }
             .grid { grid-template-columns: 1fr; }
+            .status-bar { gap: 1rem; flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Shu<span>Hub</span></h1>
-        <p>PM&R Training Tools by Zach Shumaker</p>
-    </div>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-gradient" aria-hidden="true"></div>
 
-    <div class="grid">
-        <a class="card" href="/LEARNEMG/">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <div class="container">
+        <header>
+            <svg class="waveform-container" viewBox="0 0 800 120" preserveAspectRatio="none" aria-hidden="true">
+                <polyline class="waveform-line" points="0,60 40,60 60,60 80,58 100,62 120,55 140,65 160,60 180,60 200,58 220,62 240,60 260,60 280,60 300,30 310,15 320,60 330,90 340,60 350,55 360,60 380,60 400,60 420,60 440,58 460,62 480,55 500,65 520,60 540,60 560,60 580,60 600,30 610,15 620,60 630,90 640,60 650,55 660,60 680,60 700,60 720,58 740,62 760,60 780,60 800,60"/>
+                <polyline class="waveform-line" points="0,60 50,60 70,58 90,63 110,57 130,62 150,60 170,60 190,60 210,58 230,60 250,60 270,60 290,55 310,20 320,60 330,85 340,60 360,60 380,58 400,60 420,60 440,60 460,57 480,63 500,60 510,60 530,60 550,60 570,55 590,20 600,60 610,85 620,60 640,60 660,58 680,60 700,60 720,60 740,58 760,62 780,60 800,60"/>
+                <polyline class="waveform-line" points="0,60 60,60 80,57 100,64 120,58 140,60 160,60 200,60 220,60 240,60 280,60 300,35 315,12 325,60 335,88 345,60 360,58 380,60 400,60 440,60 460,60 480,58 500,62 520,60 560,60 580,60 600,35 615,12 625,60 635,88 645,60 660,58 680,60 700,60 740,60 760,60 780,58 800,60"/>
+            </svg>
+            <h1>Shu<span>Hub</span></h1>
+            <p class="subtitle">PM&R Training Command Center</p>
+        </header>
+
+        <nav class="status-bar" aria-label="System status">
+            <div class="status-item">
+                <div class="status-dot" aria-hidden="true"></div>
+                <span>8 MODULES ONLINE</span>
             </div>
-            <div class="card-title">LEARN / EMG</div>
-            <div class="card-desc">Electrodiagnostic study training with interactive nerve conduction and EMG cases.</div>
-            <div class="card-tag">Live</div>
-        </a>
-
-        <a class="card" href="/Oralboards/">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            <div class="status-item">
+                <div class="status-dot amber" aria-hidden="true"></div>
+                <span>2 IN DEVELOPMENT</span>
             </div>
-            <div class="card-title">Oral Boards</div>
-            <div class="card-desc">Practice oral board examination scenarios with structured case presentations.</div>
-            <div class="card-tag">Live</div>
-        </a>
-
-        <a class="card" href="/Ultrasound-Pro/">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <div class="status-item">
+                <span>SYS v2.0</span>
             </div>
-            <div class="card-title">US Guided Injections</div>
-            <div class="card-desc">Ultrasound-guided injection reference with anatomy and technique guides.</div>
-            <div class="card-tag">Live</div>
-        </a>
+        </nav>
 
-        <a class="card" href="/spasticity/">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <div class="card-title">Spasticity Injection</div>
-            <div class="card-desc">Muscle targeting and injection guidance for spasticity management.</div>
-            <div class="card-tag">Live</div>
-        </a>
+        <main class="grid" role="list">
+            <a class="card" href="/LEARNEMG/" data-color="green" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">LEARN / EMG</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Electrodiagnostic study training with interactive nerve conduction and EMG cases.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">EDX</span>
+                    <span class="card-meta-tag">NCS</span>
+                    <span class="card-meta-tag">NEEDLE EMG</span>
+                </div>
+            </a>
 
-        <a class="card" href="/sci-training/">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
-            </div>
-            <div class="card-title">SCI Training</div>
-            <div class="card-desc">Spinal cord injury rehabilitation training with evidence-based protocols.</div>
-            <div class="card-tag">Flutter App</div>
-        </a>
+            <a class="card" href="/Oralboards/" data-color="cyan" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">Oral Boards</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Practice oral board examination scenarios with structured case presentations.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">CASES</span>
+                    <span class="card-meta-tag">EXAM PREP</span>
+                </div>
+            </a>
 
-        <a class="card" href="/tbi-training/">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-            </div>
-            <div class="card-title">TBI Training</div>
-            <div class="card-desc">Traumatic brain injury management and rehabilitation training.</div>
-            <div class="card-tag">Flutter App</div>
-        </a>
+            <a class="card" href="/Ultrasound-Pro/" data-color="blue" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">US Guided Injections</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Ultrasound-guided injection reference with anatomy and technique guides.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">MSK</span>
+                    <span class="card-meta-tag">PROCEDURES</span>
+                </div>
+            </a>
 
-        <a class="card" href="/cva-training/">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            </div>
-            <div class="card-title">CVA Training</div>
-            <div class="card-desc">Cerebrovascular accident rehabilitation and stroke recovery training.</div>
-            <div class="card-tag">Flutter App</div>
-        </a>
+            <a class="card" href="/spasticity/" data-color="purple" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">Spasticity Injection</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Muscle targeting and injection guidance for spasticity management.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">BOTOX</span>
+                    <span class="card-meta-tag">ANATOMY</span>
+                </div>
+            </a>
 
-        <a class="card" href="/Midnight-Board-Review/">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </div>
-            <div class="card-title">Midnight Board Review</div>
-            <div class="card-desc">Late-night board review sessions with flashcard-style Q&A.</div>
-            <div class="card-tag">Flutter App</div>
-        </a>
+            <a class="card" href="/sci-training/" data-color="teal" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">SCI Training</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Spinal cord injury rehabilitation training with evidence-based protocols.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">ASIA</span>
+                    <span class="card-meta-tag">LEVELS</span>
+                    <span class="card-meta-tag">REHAB</span>
+                </div>
+            </a>
 
-        <a class="card" href="https://flashcards.shuhub.xyz">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 4v16"/></svg>
-            </div>
-            <div class="card-title">PMR Flashcards</div>
-            <div class="card-desc">Spaced repetition flashcards for PM&R board review with progress tracking.</div>
-            <div class="card-tag">Next.js App</div>
-        </a>
+            <a class="card" href="/tbi-training/" data-color="pink" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">TBI Training</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Traumatic brain injury management and rehabilitation training.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">GCS</span>
+                    <span class="card-meta-tag">RANCHO</span>
+                    <span class="card-meta-tag">COGNITIVE</span>
+                </div>
+            </a>
 
-        <a class="card coming-soon" href="#">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            </div>
-            <div class="card-title">Pediatric Rehab</div>
-            <div class="card-desc">Pediatric rehabilitation training and reference materials.</div>
-            <div class="card-tag">Coming Soon</div>
-        </a>
+            <a class="card" href="/cva-training/" data-color="orange" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">CVA Training</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Cerebrovascular accident rehabilitation and stroke recovery training.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">STROKE</span>
+                    <span class="card-meta-tag">NIHSS</span>
+                    <span class="card-meta-tag">RECOVERY</span>
+                </div>
+            </a>
 
-        <a class="card coming-soon" href="#">
-            <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-            </div>
-            <div class="card-title">P&O Training</div>
-            <div class="card-desc">Prosthetics and orthotics training with device selection guides.</div>
-            <div class="card-tag">Coming Soon</div>
-        </a>
-    </div>
+            <a class="card" href="/Midnight-Board-Review/" data-color="amber" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">Midnight Board Review</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Late-night board review sessions with flashcard-style Q&A.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">REVIEW</span>
+                    <span class="card-meta-tag">Q&A</span>
+                </div>
+            </a>
 
-    <div class="footer">
-        &copy; 2026 Zach Shumaker &middot; ShuHub
+            <a class="card" href="https://flashcards.shuhub.xyz" data-color="green" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">PMR Flashcards</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Spaced repetition flashcards for PM&R board review with progress tracking.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">SRS</span>
+                    <span class="card-meta-tag">BOARD PREP</span>
+                </div>
+            </a>
+
+            <a class="card coming-soon" href="#" data-color="cyan" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">Pediatric Rehab</div>
+                    <div class="card-status"><div class="card-status-dot"></div> STANDBY</div>
+                </div>
+                <div class="card-desc">Pediatric rehabilitation training and reference materials.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">PEDS</span>
+                    <span class="card-meta-tag">DEV</span>
+                </div>
+            </a>
+
+            <a class="card coming-soon" href="#" data-color="blue" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">P&O Training</div>
+                    <div class="card-status"><div class="card-status-dot"></div> STANDBY</div>
+                </div>
+                <div class="card-desc">Prosthetics and orthotics training with device selection guides.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">PROSTHETICS</span>
+                    <span class="card-meta-tag">ORTHOTICS</span>
+                </div>
+            </a>
+        </main>
+
+        <footer>
+            <span>&copy; 2026 ZACH SHUMAKER // SHUHUB</span>
+        </footer>
     </div>
 </body>
 </html>
