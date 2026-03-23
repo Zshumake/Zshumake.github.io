@@ -409,11 +409,11 @@
         <nav class="status-bar" aria-label="System status">
             <div class="status-item">
                 <div class="status-dot" aria-hidden="true"></div>
-                <span>8 MODULES ONLINE</span>
+                <span>11 MODULES ONLINE</span>
             </div>
             <div class="status-item">
                 <div class="status-dot amber" aria-hidden="true"></div>
-                <span>2 IN DEVELOPMENT</span>
+                <span>ALL SYSTEMS GO</span>
             </div>
             <div class="status-item">
                 <span>SYS v2.0</span>
@@ -533,22 +533,22 @@
                 </div>
             </a>
 
-            <a class="card coming-soon" href="#" data-color="cyan" role="listitem">
+            <a class="card" href="/peds-rehab/" data-color="cyan" role="listitem">
                 <div class="card-header">
                     <div class="card-title">Pediatric Rehab</div>
-                    <div class="card-status"><div class="card-status-dot"></div> STANDBY</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
                 </div>
                 <div class="card-desc">Pediatric rehabilitation training and reference materials.</div>
                 <div class="card-meta">
                     <span class="card-meta-tag">PEDS</span>
-                    <span class="card-meta-tag">DEV</span>
+                    <span class="card-meta-tag">DEVELOPMENT</span>
                 </div>
             </a>
 
-            <a class="card coming-soon" href="#" data-color="blue" role="listitem">
+            <a class="card" href="/po-training/" data-color="blue" role="listitem">
                 <div class="card-header">
                     <div class="card-title">P&O Training</div>
-                    <div class="card-status"><div class="card-status-dot"></div> STANDBY</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
                 </div>
                 <div class="card-desc">Prosthetics and orthotics training with device selection guides.</div>
                 <div class="card-meta">
@@ -562,5 +562,17 @@
             <span>&copy; 2026 ZACH SHUMAKER // SHUHUB</span>
         </footer>
     </div>
+
+    <script src="ernest.js"></script>
+    <script>
+        Ernest.init({
+            position: 'bottom-right',
+            persona: 'ernest',
+            size: 100,
+            greeting: true,
+            idleChat: true,
+            idleInterval: 45000
+        });
+    </script>
 </body>
 </html>
