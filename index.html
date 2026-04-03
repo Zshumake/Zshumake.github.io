@@ -318,6 +318,7 @@
         .card[data-color="pink"]   { --card-accent: var(--pink);   --card-glow: var(--pink-dim); }
         .card[data-color="amber"]  { --card-accent: var(--amber);  --card-glow: var(--amber-dim); }
         .card[data-color="orange"] { --card-accent: var(--orange); --card-glow: var(--orange-dim); }
+        .card[data-color="red"]    { --card-accent: var(--red);    --card-glow: rgba(255, 61, 0, 0.15); }
 
         /* Coming soon */
         .card.coming-soon {
@@ -409,7 +410,7 @@
         <nav class="status-bar" aria-label="System status">
             <div class="status-item">
                 <div class="status-dot" aria-hidden="true"></div>
-                <span>11 MODULES ONLINE</span>
+                <span>12 MODULES ONLINE</span>
             </div>
             <div class="status-item">
                 <div class="status-dot amber" aria-hidden="true"></div>
@@ -554,6 +555,19 @@
                 <div class="card-meta">
                     <span class="card-meta-tag">PROSTHETICS</span>
                     <span class="card-meta-tag">ORTHOTICS</span>
+                </div>
+            </a>
+
+            <a class="card" href="/interventional-spine-trainer/" data-color="red" role="listitem">
+                <div class="card-header">
+                    <div class="card-title">Interventional Spine</div>
+                    <div class="card-status"><div class="card-status-dot"></div> ONLINE</div>
+                </div>
+                <div class="card-desc">Interventional pain & spine procedures with quiz engine, decision pathways, and fluoroscopy references.</div>
+                <div class="card-meta">
+                    <span class="card-meta-tag">SPINE</span>
+                    <span class="card-meta-tag">INJECTIONS</span>
+                    <span class="card-meta-tag">FSRS</span>
                 </div>
             </a>
         </main>

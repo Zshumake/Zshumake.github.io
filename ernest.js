@@ -148,6 +148,19 @@
     <style id="ernest-module-styles">
     /* ===== WIDGET CONTAINER ===== */
     .ernest-widget {
+        --ea: #88dded;
+        --ea-rgb: 136,221,237;
+        --ea-dim: rgba(136,221,237,0.15);
+        --ea-subtle: rgba(136,221,237,0.1);
+        --ea-border: rgba(136,221,237,0.3);
+        --ea-border-light: rgba(136,221,237,0.2);
+        --ea-border-faint: rgba(136,221,237,0.1);
+        --ea-border-strong: rgba(136,221,237,0.4);
+        --ea-border-bright: rgba(136,221,237,0.7);
+        --ea-text-muted: #5a7a95;
+        --ea-bg: rgba(12,20,35,0.95);
+        --ea-bg-deep: rgba(10,14,26,0.97);
+        --ea-bg-input: rgba(20,30,50,0.8);
         position: fixed;
         z-index: 9999;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -203,8 +216,8 @@
         position: absolute;
         bottom: 100%;
         right: 0;
-        background: rgba(12, 20, 35, 0.95);
-        border: 1px solid rgba(136, 221, 237, 0.3);
+        background: var(--ea-bg);
+        border: 1px solid var(--ea-border);
         border-radius: 8px 8px 0 8px;
         padding: 0.6rem 0.9rem;
         font-family: 'JetBrains Mono', 'SF Mono', monospace;
@@ -218,31 +231,31 @@
         transform: translateY(8px) scale(0.95);
         transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         backdrop-filter: blur(12px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 15px rgba(136,221,237,0.05);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 15px rgba(var(--ea-rgb),0.05);
         margin-bottom: 8px;
     }
     .ernest-bubble.visible { opacity:1; transform:translateY(0) scale(1); }
     .ernest-bubble::after {
         content:''; position:absolute; bottom:-6px; right:16px; width:12px; height:12px;
-        background:rgba(12,20,35,0.95); border-right:1px solid rgba(136,221,237,0.3);
-        border-bottom:1px solid rgba(136,221,237,0.3); transform:rotate(45deg);
+        background:var(--ea-bg); border-right:1px solid var(--ea-border);
+        border-bottom:1px solid var(--ea-border); transform:rotate(45deg);
     }
     .ernest-bubble .ernest-bubble-name {
         font-weight:700; font-size:0.6rem; text-transform:uppercase;
-        letter-spacing:0.08em; margin-bottom:0.25rem; color:#88dded;
+        letter-spacing:0.08em; margin-bottom:0.25rem; color:var(--ea);
     }
 
     /* ===== PERSONA TOGGLE ===== */
     .ernest-toggle {
         position:absolute; top:-4px; left:-4px; width:20px; height:20px;
-        border-radius:50%; border:2px solid rgba(136,221,237,0.3);
+        border-radius:50%; border:2px solid var(--ea-border);
         background:rgba(12,20,35,0.9); cursor:pointer; display:flex;
         align-items:center; justify-content:center; font-size:0.5rem;
-        color:#88dded; font-family:'JetBrains Mono',monospace; font-weight:700;
+        color:var(--ea); font-family:'JetBrains Mono',monospace; font-weight:700;
         transition:all 0.2s; opacity:0;
     }
     .ernest-char-wrap:hover .ernest-toggle { opacity:1; }
-    .ernest-toggle:hover { background:rgba(136,221,237,0.15); transform:scale(1.15); }
+    .ernest-toggle:hover { background:var(--ea-dim); transform:scale(1.15); }
 
     /* ===== HIGHLIGHT TOOLTIP ===== */
     .ernest-tooltip {
@@ -252,16 +265,16 @@
         align-items: center;
         gap: 0.4rem;
         padding: 0.35rem 0.7rem;
-        background: rgba(12, 20, 35, 0.95);
-        border: 1px solid rgba(136, 221, 237, 0.4);
+        background: var(--ea-bg, rgba(12,20,35,0.95));
+        border: 1px solid var(--ea-border-strong, rgba(136,221,237,0.4));
         border-radius: 6px;
         cursor: pointer;
         font-family: 'JetBrains Mono', 'SF Mono', monospace;
         font-size: 0.68rem;
-        color: #88dded;
+        color: var(--ea, #88dded);
         font-weight: 600;
         backdrop-filter: blur(12px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 12px rgba(136,221,237,0.1);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 12px rgba(var(--ea-rgb, 136,221,237),0.1);
         transition: all 0.15s ease;
         user-select: none;
         white-space: nowrap;
@@ -269,7 +282,7 @@
     }
     .ernest-tooltip:hover {
         background: rgba(20, 35, 60, 0.95);
-        border-color: rgba(136, 221, 237, 0.7);
+        border-color: var(--ea-border-bright, rgba(136,221,237,0.7));
         transform: scale(1.05);
     }
     @keyframes ernest-tooltip-in {
@@ -280,7 +293,7 @@
         width: 18px;
         height: 18px;
         border-radius: 4px;
-        background: rgba(136, 221, 237, 0.15);
+        background: var(--ea-dim);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -294,13 +307,13 @@
         right: 20px;
         width: 380px;
         max-height: 560px;
-        background: rgba(10, 14, 26, 0.97);
-        border: 1px solid rgba(136, 221, 237, 0.2);
+        background: var(--ea-bg-deep);
+        border: 1px solid var(--ea-border-light);
         border-radius: 12px;
         display: flex;
         flex-direction: column;
         z-index: 10001;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(136,221,237,0.05);
+        box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(var(--ea-rgb),0.05);
         backdrop-filter: blur(20px);
         opacity: 0;
         transform: translateY(20px) scale(0.95);
@@ -318,25 +331,25 @@
         align-items: center;
         justify-content: space-between;
         padding: 0.75rem 1rem;
-        border-bottom: 1px solid rgba(136, 221, 237, 0.1);
+        border-bottom: 1px solid var(--ea-border-faint);
     }
     .ernest-chat-title {
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.8rem;
         font-weight: 700;
-        color: #88dded;
+        color: var(--ea);
         text-transform: uppercase;
         letter-spacing: 0.06em;
     }
     .ernest-chat-close {
         width: 24px; height: 24px; border-radius: 4px;
-        border: 1px solid rgba(136, 221, 237, 0.2);
-        background: transparent; color: #5a7a95; cursor: pointer;
+        border: 1px solid var(--ea-border-light);
+        background: transparent; color: var(--ea-text-muted); cursor: pointer;
         display: flex; align-items: center; justify-content: center;
         font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;
         transition: all 0.15s;
     }
-    .ernest-chat-close:hover { background:rgba(136,221,237,0.1); color:#88dded; }
+    .ernest-chat-close:hover { background:var(--ea-subtle); color:var(--ea); }
 
     .ernest-chat-messages {
         flex: 1;
@@ -348,7 +361,7 @@
         min-height: 200px;
         max-height: 380px;
         scrollbar-width: thin;
-        scrollbar-color: rgba(136,221,237,0.15) transparent;
+        scrollbar-color: var(--ea-dim) transparent;
     }
 
     .ernest-msg {
@@ -374,8 +387,8 @@
     }
     .ernest-msg.assistant {
         align-self: flex-start;
-        background: rgba(136, 221, 237, 0.06);
-        border: 1px solid rgba(136, 221, 237, 0.12);
+        background: rgba(var(--ea-rgb),0.06);
+        border: 1px solid rgba(var(--ea-rgb),0.12);
         color: #d0dce8;
         font-family: 'Inter', sans-serif;
     }
@@ -386,15 +399,15 @@
         text-transform: uppercase;
         letter-spacing: 0.06em;
         margin-bottom: 0.3rem;
-        color: #88dded;
+        color: var(--ea);
     }
     .ernest-msg.user .ernest-msg-name { color: #448aff; }
-    .ernest-msg em { color: #88dded; font-style: italic; }
+    .ernest-msg em { color: var(--ea); font-style: italic; }
 
     .ernest-msg-loading {
         align-self: flex-start;
         padding: 0.6rem 0.8rem;
-        color: #5a7a95;
+        color: var(--ea-text-muted);
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.7rem;
         display: flex;
@@ -405,7 +418,7 @@
         display: inline-block;
         width: 5px; height: 5px;
         border-radius: 50%;
-        background: #88dded;
+        background: var(--ea);
         animation: ernest-dot-pulse 1.4s ease-in-out infinite;
     }
     .ernest-dots span:nth-child(2) { animation-delay: 0.2s; }
@@ -419,12 +432,12 @@
         display: flex;
         gap: 0.4rem;
         padding: 0.6rem 0.75rem;
-        border-top: 1px solid rgba(136, 221, 237, 0.1);
+        border-top: 1px solid var(--ea-border-faint);
     }
     .ernest-chat-input {
         flex: 1;
-        background: rgba(20, 30, 50, 0.8);
-        border: 1px solid rgba(136, 221, 237, 0.15);
+        background: var(--ea-bg-input);
+        border: 1px solid rgba(var(--ea-rgb),0.15);
         border-radius: 6px;
         padding: 0.5rem 0.7rem;
         font-family: 'Inter', sans-serif;
@@ -433,39 +446,39 @@
         outline: none;
         transition: border-color 0.2s;
     }
-    .ernest-chat-input:focus { border-color: rgba(136, 221, 237, 0.4); }
+    .ernest-chat-input:focus { border-color: var(--ea-border-strong); }
     .ernest-chat-input::placeholder { color: #3a5a70; }
 
     .ernest-chat-send {
         padding: 0.5rem 0.8rem;
         border-radius: 6px;
-        border: 1px solid rgba(136, 221, 237, 0.3);
-        background: rgba(136, 221, 237, 0.1);
-        color: #88dded;
+        border: 1px solid var(--ea-border);
+        background: var(--ea-subtle);
+        color: var(--ea);
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.7rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.15s;
     }
-    .ernest-chat-send:hover { background:rgba(136,221,237,0.2); }
+    .ernest-chat-send:hover { background:var(--ea-dim); }
     .ernest-chat-send:disabled { opacity:0.4; cursor:not-allowed; }
 
     .ernest-api-setup {
         padding: 0.75rem;
         text-align: center;
-        border-bottom: 1px solid rgba(136, 221, 237, 0.1);
+        border-bottom: 1px solid var(--ea-border-faint);
     }
     .ernest-api-setup p {
         font-size: 0.72rem;
-        color: #5a7a95;
+        color: var(--ea-text-muted);
         margin-bottom: 0.5rem;
         font-family: 'Inter', sans-serif;
     }
     .ernest-api-input {
         width: 100%;
-        background: rgba(20, 30, 50, 0.8);
-        border: 1px solid rgba(136, 221, 237, 0.2);
+        background: var(--ea-bg-input);
+        border: 1px solid var(--ea-border-light);
         border-radius: 4px;
         padding: 0.4rem 0.6rem;
         font-family: 'JetBrains Mono', monospace;
@@ -510,8 +523,16 @@
         return arr[Math.floor(Math.random() * arr.length)];
     }
 
+    function escapeHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
     // ===== INIT =====
     function createWidget(options) {
+        if (widget) destroy();
+
         config = Object.assign({
             position: 'bottom-right',
             persona: 'ernest',
@@ -664,11 +685,6 @@
         var nameText = role === 'user' ? 'You' : PERSONAS[currentPersona].name;
         msg.innerHTML = '<div class="ernest-msg-name">' + nameText + '</div>' + formatText(text);
 
-        // Apply persona accent color
-        if (role !== 'user') {
-            msg.querySelector('.ernest-msg-name').style.color = PERSONAS[currentPersona].accentColor;
-        }
-
         messages.appendChild(msg);
         messages.scrollTop = messages.scrollHeight;
     }
@@ -689,11 +705,11 @@
     }
 
     function formatText(text) {
-        // Basic markdown-ish formatting
-        return text
+        var safe = escapeHtml(text);
+        return safe
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/`(.*?)`/g, '<code style="background:rgba(136,221,237,0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:0.72rem;">$1</code>')
+            .replace(/`(.*?)`/g, '<code style="background:rgba(var(--ea-rgb,136,221,237),0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:0.72rem;">$1</code>')
             .replace(/\n/g, '<br>');
     }
 
@@ -703,7 +719,7 @@
         tooltipEl.className = 'ernest-tooltip';
         tooltipEl.innerHTML =
             '<div class="ernest-tooltip-icon">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="#88dded" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' +
             '</div>' +
             '<span>Ask ' + PERSONAS[currentPersona].name + '</span>';
 
@@ -736,9 +752,6 @@
                 if (container.closest && (container.closest('.ernest-chat') || container.closest('.ernest-widget'))) return;
 
                 tooltipEl.querySelector('span').textContent = 'Ask ' + PERSONAS[currentPersona].name;
-                tooltipEl.style.borderColor = PERSONAS[currentPersona].accentColor + '66';
-                tooltipEl.style.color = PERSONAS[currentPersona].accentColor;
-                tooltipEl.querySelector('.ernest-tooltip-icon svg').setAttribute('stroke', PERSONAS[currentPersona].accentColor);
 
                 tooltipEl.style.top = (rect.bottom + scrollTop + 8) + 'px';
                 tooltipEl.style.left = (rect.left + scrollLeft + (rect.width / 2) - 60) + 'px';
@@ -797,6 +810,27 @@
         callGemini(query);
     }
 
+    function addStreamingMessage() {
+        var messages = chatEl.querySelector('.ernest-chat-messages');
+        var msg = document.createElement('div');
+        msg.className = 'ernest-msg assistant';
+        msg.id = 'ernest-streaming';
+        var nameText = PERSONAS[currentPersona].name;
+        msg.innerHTML = '<div class="ernest-msg-name">' + escapeHtml(nameText) + '</div><span class="ernest-stream-text"></span>';
+        messages.appendChild(msg);
+        messages.scrollTop = messages.scrollHeight;
+        return msg.querySelector('.ernest-stream-text');
+    }
+
+    function finalizeStreamingMessage(fullText) {
+        var el = document.getElementById('ernest-streaming');
+        if (el) {
+            el.id = '';
+            var textSpan = el.querySelector('.ernest-stream-text');
+            if (textSpan) textSpan.outerHTML = formatText(fullText);
+        }
+    }
+
     async function callGemini(query) {
         if (!apiKey) {
             addChatMessage('assistant', 'I need an API key to answer. Click the setup area at the top of this chat to add your Gemini key.');
@@ -811,7 +845,7 @@
         sendBtn.disabled = true;
 
         var persona = PERSONAS[currentPersona];
-        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + config.geminiModel + ':generateContent?key=' + apiKey;
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + config.geminiModel + ':streamGenerateContent?alt=sse&key=' + apiKey;
 
         var body = {
             contents: conversationHistory.slice(-10),
@@ -831,17 +865,52 @@
                 throw new Error(err.error ? err.error.message : 'API error ' + response.status);
             }
 
-            var data = await response.json();
-            var text = data.candidates && data.candidates[0] && data.candidates[0].content
-                ? data.candidates[0].content.parts[0].text
-                : 'No response generated.';
-
-            conversationHistory.push({ role: 'model', parts: [{ text: text }] });
-
             removeLoadingMessage();
-            addChatMessage('assistant', text);
+            var streamSpan = addStreamingMessage();
+            var fullText = '';
+            var messages = chatEl.querySelector('.ernest-chat-messages');
+
+            var reader = response.body.getReader();
+            var decoder = new TextDecoder();
+            var buffer = '';
+
+            while (true) {
+                var result = await reader.read();
+                if (result.done) break;
+
+                buffer += decoder.decode(result.value, { stream: true });
+                var lines = buffer.split('\n');
+                buffer = lines.pop();
+
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i].trim();
+                    if (!line.startsWith('data: ')) continue;
+                    var jsonStr = line.slice(6);
+                    if (!jsonStr || jsonStr === '[DONE]') continue;
+
+                    try {
+                        var chunk = JSON.parse(jsonStr);
+                        if (chunk.candidates && chunk.candidates[0] && chunk.candidates[0].content) {
+                            var parts = chunk.candidates[0].content.parts;
+                            if (parts && parts[0] && parts[0].text) {
+                                fullText += parts[0].text;
+                                streamSpan.textContent = fullText;
+                                messages.scrollTop = messages.scrollHeight;
+                            }
+                        }
+                    } catch (parseErr) { /* skip malformed chunks */ }
+                }
+            }
+
+            if (!fullText) fullText = 'No response generated.';
+            finalizeStreamingMessage(fullText);
+
+            conversationHistory.push({ role: 'model', parts: [{ text: fullText }] });
+            if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
         } catch (e) {
             removeLoadingMessage();
+            var streamEl = document.getElementById('ernest-streaming');
+            if (streamEl) streamEl.remove();
             var errMsg = currentPersona === 'earl'
                 ? 'Connection severed. Check your API key or Wi-Fi. Error: ' + e.message
                 : 'Signal lost! Error: ' + e.message;
@@ -863,11 +932,9 @@
         var textEl = bubble.querySelector('.ernest-bubble-text');
 
         nameEl.textContent = PERSONAS[currentPersona].name;
-        nameEl.style.color = PERSONAS[currentPersona].accentColor;
         textEl.textContent = text;
 
         bubble.classList.add('visible');
-        bubble.style.borderColor = PERSONAS[currentPersona].accentColor + '33';
 
         clearTimeout(bubbleTimer);
         bubbleTimer = setTimeout(function () {
@@ -896,28 +963,57 @@
         setTimeout(function () { setMood('idle'); }, 1500);
     }
 
+    function hexToRgb(hex) {
+        var r = parseInt(hex.slice(1, 3), 16);
+        var g = parseInt(hex.slice(3, 5), 16);
+        var b = parseInt(hex.slice(5, 7), 16);
+        return r + ',' + g + ',' + b;
+    }
+
     function applyPersona() {
         if (!widget) return;
         var persona = PERSONAS[currentPersona];
-        var led = widget.querySelector('.ernest-led');
-        var toggle = widget.querySelector('.ernest-toggle');
 
+        // Set CSS custom properties on the widget root -- all themed styles cascade
+        var rgb = hexToRgb(persona.accentColor);
+        widget.style.setProperty('--ea', persona.accentColor);
+        widget.style.setProperty('--ea-rgb', rgb);
+        widget.style.setProperty('--ea-dim', 'rgba(' + rgb + ',0.15)');
+        widget.style.setProperty('--ea-subtle', 'rgba(' + rgb + ',0.1)');
+        widget.style.setProperty('--ea-border', 'rgba(' + rgb + ',0.3)');
+        widget.style.setProperty('--ea-border-light', 'rgba(' + rgb + ',0.2)');
+        widget.style.setProperty('--ea-border-faint', 'rgba(' + rgb + ',0.1)');
+        widget.style.setProperty('--ea-border-strong', 'rgba(' + rgb + ',0.4)');
+        widget.style.setProperty('--ea-border-bright', 'rgba(' + rgb + ',0.7)');
+
+        // Also set on chat panel (it's not a child of widget)
+        if (chatEl) {
+            chatEl.style.setProperty('--ea', persona.accentColor);
+            chatEl.style.setProperty('--ea-rgb', rgb);
+            chatEl.style.setProperty('--ea-dim', 'rgba(' + rgb + ',0.15)');
+            chatEl.style.setProperty('--ea-subtle', 'rgba(' + rgb + ',0.1)');
+            chatEl.style.setProperty('--ea-border', 'rgba(' + rgb + ',0.3)');
+            chatEl.style.setProperty('--ea-border-light', 'rgba(' + rgb + ',0.2)');
+            chatEl.style.setProperty('--ea-border-faint', 'rgba(' + rgb + ',0.1)');
+            chatEl.style.setProperty('--ea-border-strong', 'rgba(' + rgb + ',0.4)');
+            chatEl.style.setProperty('--ea-border-bright', 'rgba(' + rgb + ',0.7)');
+
+            var title = chatEl.querySelector('.ernest-chat-title');
+            if (title) title.textContent = persona.name;
+        }
+
+        // LED and SVG elements
+        var led = widget.querySelector('.ernest-led');
         if (led) { led.setAttribute('fill', persona.ledColor); led.style.filter = persona.ledGlow; }
+
+        var toggle = widget.querySelector('.ernest-toggle');
         if (toggle) {
             toggle.textContent = currentPersona === 'ernest' ? 'E' : 'X';
             toggle.title = currentPersona === 'ernest' ? 'Switch to Earl' : 'Switch to Ernest';
-            toggle.style.color = persona.accentColor;
-            toggle.style.borderColor = persona.accentColor + '33';
         }
 
         var zaps = widget.querySelectorAll('.ernest-zaps path');
         zaps.forEach(function (z) { z.setAttribute('stroke', persona.accentColor); });
-
-        // Update chat header
-        if (chatEl) {
-            var title = chatEl.querySelector('.ernest-chat-title');
-            if (title) { title.textContent = persona.name; title.style.color = persona.accentColor; }
-        }
 
         // Update tooltip
         if (tooltipEl) {
