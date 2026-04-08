@@ -141,6 +141,11 @@
                 <g class="ernest-mouth" transform="translate(78.5,108.75) scale(0.65)"><clipPath id="emc"><path d="M175 315C175 315 210 325 245 315C245 355 175 355 175 315Z"/></clipPath><path d="M175 315C175 315 210 325 245 315C245 355 175 355 175 315Z" fill="#141517" class="eo" stroke-linejoin="round"/><path d="M185 340Q210 315 235 340C235 365 185 365 185 340Z" fill="#ff7675" stroke="#2a2d34" stroke-width="2" clip-path="url(#emc)"/><path d="M168 310Q172 312 175 315" fill="none" class="eo"/><path d="M252 310Q248 312 245 315" fill="none" class="eo"/></g>
             </g>
             <g class="ernest-zaps"><path d="M155 10L140-20 160-35 145-60" fill="none" stroke="#88dded" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M265 10L280-20 260-35 275-60" fill="none" stroke="#88dded" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>
+            <g class="ernest-zs">
+                <text class="ernest-z1" x="320" y="80" font-family="JetBrains Mono, monospace" font-size="36" font-weight="900" fill="#88dded" stroke="#2a2d34" stroke-width="2">Z</text>
+                <text class="ernest-z2" x="335" y="60" font-family="JetBrains Mono, monospace" font-size="28" font-weight="900" fill="#88dded" stroke="#2a2d34" stroke-width="2">z</text>
+                <text class="ernest-z3" x="345" y="40" font-family="JetBrains Mono, monospace" font-size="22" font-weight="900" fill="#88dded" stroke="#2a2d34" stroke-width="2">z</text>
+            </g>
         </g>
     </svg>`;
 
@@ -187,25 +192,117 @@
     }
 
     /* ===== ANIMATIONS ===== */
+    /* All body animations use translateY/rotate only - no scale (the wrapper handles size).
+       Magnitudes are scaled down ~5x from the original since the original used scale(0.55). */
+
+    .ernest-svg { transform-origin: 50% 100%; }
+
+    /* Idle bounce */
     .ernest-idle .ernest-svg { animation: ernest-m-bounce 3s ease-in-out infinite; }
-    @keyframes ernest-m-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes ernest-m-bounce {
+        0%,100%{transform:translateY(0)}
+        50%{transform:translateY(-6px)}
+    }
 
-    .ernest-excited .ernest-svg { animation: ernest-m-excited 0.5s ease-in-out infinite; }
-    @keyframes ernest-m-excited { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-12px) rotate(-3deg)} 75%{transform:translateY(-12px) rotate(3deg)} }
+    /* Sleeping - deeper, slower breathing */
+    .ernest-sleeping .ernest-svg { animation: ernest-m-breathe 4s ease-in-out infinite; }
+    @keyframes ernest-m-breathe {
+        0%,100%{transform:translateY(0)}
+        50%{transform:translateY(-9px)}
+    }
 
+    /* Thinking - tilted bounce */
     .ernest-thinking .ernest-svg { animation: ernest-m-think 2s ease-in-out infinite; }
-    @keyframes ernest-m-think { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-4px) rotate(-5deg)} }
+    @keyframes ernest-m-think {
+        0%,100%{transform:translateY(0) rotate(0)}
+        50%{transform:translateY(-10px) rotate(-8deg)}
+    }
 
+    /* Excited - heavy bounce with sparks */
+    .ernest-excited .ernest-svg { animation: ernest-m-excited 0.6s ease-in-out infinite; }
+    @keyframes ernest-m-excited {
+        0%,100%{transform:translateY(-10px)}
+        50%{transform:translateY(20px)}
+    }
+
+    /* Lecturing - lean and point */
+    .ernest-lecturing .ernest-svg { animation: ernest-m-lecture 2s ease-in-out infinite; }
+    @keyframes ernest-m-lecture {
+        0%,100%{transform:translateY(0) rotate(0deg)}
+        50%{transform:translateY(-3px) rotate(-6deg) scale(1.05)}
+    }
+
+    /* Dancing - left-right rotation */
+    .ernest-dancing .ernest-svg { animation: ernest-m-dance 1s ease-in-out infinite alternate; }
+    @keyframes ernest-m-dance {
+        0%{transform:rotate(-15deg) translateY(-5px)}
+        50%{transform:rotate(0deg) translateY(10px)}
+        100%{transform:rotate(15deg) translateY(-5px)}
+    }
+
+    /* Jumping - extreme leap */
+    .ernest-jumping .ernest-svg { animation: ernest-m-jump 0.8s ease-in-out infinite; }
+    @keyframes ernest-m-jump {
+        0%,100%{transform:translateY(-15px)}
+        50%{transform:translateY(30px)}
+    }
+
+    /* Waving - rotation only, plays 3 times then settles */
     .ernest-waving .ernest-svg { animation: ernest-m-wave 0.8s ease-in-out 3; }
-    @keyframes ernest-m-wave { 0%,100%{transform:rotate(0)} 25%{transform:rotate(8deg)} 75%{transform:rotate(-8deg)} }
+    @keyframes ernest-m-wave {
+        0%,100%{transform:rotate(-10deg) translateY(-5px)}
+        50%{transform:rotate(15deg) translateY(5px)}
+    }
 
+    /* Pop-out - one-shot dramatic entry */
+    .ernest-pop-out .ernest-svg { animation: ernest-m-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes ernest-m-pop {
+        0%{transform:translateY(-20px) scale(0.7)}
+        40%{transform:translateY(15px) scale(1.15)}
+        70%{transform:translateY(-7px) scale(0.95)}
+        100%{transform:translateY(0) scale(1)}
+    }
+
+    /* Talking - prongs glow + pulse during streamed responses */
+    .ernest-talking .ernest-prong-l rect,
+    .ernest-talking .ernest-prong-r rect,
+    .ernest-talking .ernest-prong-l circle,
+    .ernest-talking .ernest-prong-r circle {
+        animation: ernest-m-prong-pulse 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes ernest-m-prong-pulse {
+        0%   { fill:#b0b5ba; filter:brightness(1); }
+        100% { fill:#c8e0e8; filter:brightness(1.3) drop-shadow(0 0 4px var(--ea, #88dded)); }
+    }
+
+    /* Eye blink */
     .ernest-eyes-open { animation: ernest-m-blink 4s infinite; }
     @keyframes ernest-m-blink { 0%,90%,100%{opacity:1} 95%{opacity:0} }
     .ernest-eyes-closed { animation: ernest-m-blink-inv 4s infinite; }
     @keyframes ernest-m-blink-inv { 0%,90%,100%{opacity:0} 95%{opacity:1} }
 
+    /* LED pulse */
     .ernest-led { animation: ernest-m-led 2s ease-in-out infinite; }
     @keyframes ernest-m-led { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* Snoring Z's (sleeping state) */
+    .ernest-zs { opacity: 0; pointer-events:none; }
+    .ernest-sleeping .ernest-zs { opacity: 1; }
+    .ernest-sleeping .ernest-z1 { animation: ernest-m-float-z 3s ease-out infinite; }
+    .ernest-sleeping .ernest-z2 { animation: ernest-m-float-z 3s ease-out infinite 1s; }
+    .ernest-sleeping .ernest-z3 { animation: ernest-m-float-z 3s ease-out infinite 2s; }
+    @keyframes ernest-m-float-z {
+        0%   { transform: translate(0,0)   scale(0.6); opacity:0; }
+        20%  { opacity:1; }
+        80%  { opacity:1; }
+        100% { transform: translate(20px,-50px) scale(1.2); opacity:0; }
+    }
+
+    /* Reduced motion - respect user preference */
+    @media (prefers-reduced-motion: reduce) {
+        .ernest-svg, .ernest-svg * { animation: none !important; }
+        .ernest-led { opacity: 1; }
+    }
 
     .ernest-prong-l { transform-origin:156px 120px; animation:ernest-m-prong 4s ease-in-out infinite; }
     .ernest-prong-r { transform-origin:266px 120px; animation:ernest-m-prong 4.5s ease-in-out infinite 0.5s; }
