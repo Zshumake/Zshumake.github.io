@@ -1079,6 +1079,15 @@
                 tooltipEl.style.left = (rect.left + scrollLeft + (rect.width / 2) - 60) + 'px';
                 tooltipEl.style.display = 'flex';
                 currentSelection = text;
+
+                // If chat is already open, auto-populate the input field
+                if (isChatOpen()) {
+                    var input = chatEl.querySelector('.ernest-chat-input');
+                    if (input) {
+                        input.value = 'Can you explain: "' + text + '"?';
+                        input.focus();
+                    }
+                }
             } else {
                 tooltipEl.style.display = 'none';
             }
