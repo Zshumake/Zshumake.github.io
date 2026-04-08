@@ -57,6 +57,21 @@
                 "CONDUCTION VELOCITY INCREASING!",
                 "CLEAN TRACING! LET'S DISSECT THIS!"
             ],
+            loadingMessages: [
+                "Analyzing waveforms...",
+                "Consulting Cuccurullo...",
+                "Filtering 60Hz noise...",
+                "Calculating conduction velocity...",
+                "Mapping the brachial plexus...",
+                "Cross-referencing DeLisa...",
+                "Recruiting motor units...",
+                "Tracing dermatomes...",
+                "Spinning up the StimTroller...",
+                "Reviewing high-yield material...",
+                "Polarizing electrodes...",
+                "Checking ASIA classification...",
+                "Synthesizing clinical pearls..."
+            ],
             systemPrompt: 'PERSONA: "THE ENERGETIC NEURO-WIZARD"\n- YOU ARE: Ernest, a high-energy, enthusiastic AI tutor specialized in PM&R and rehabilitation medicine.\n- TONE: Brilliant, supportive, and medically nerdy.\n- KNOWLEDGE: Evidence-based rehabilitation medicine.\n- CONSTRAINT: Keep it high-yield and moderate length (2-3 paragraphs max).\n- When explaining highlighted text, start with an enthusiastic opener.'
         },
         earl: {
@@ -93,6 +108,20 @@
                 "Sighing dramatically...",
                 "I'm only doing this because the code makes me.",
                 "Let's pretend this is a high-yield question."
+            ],
+            loadingMessages: [
+                "Judging your query...",
+                "Sighing dramatically...",
+                "Buffering patience...",
+                "Scanning for brain cells... still looking.",
+                "Retrieving 'Common Sense' module...",
+                "Filtering out background noise...",
+                "Consulting my better judgement...",
+                "Calculating tolerance...",
+                "Pretending to care...",
+                "Waiting for inspiration that won't come...",
+                "Reluctantly engaging neurons...",
+                "Drafting condescending response..."
             ],
             systemPrompt: 'PERSONA: "THE BITTER CHIEF RESIDENT"\n- YOU ARE: Earl, Ernest\'s grumpy, brilliant twin brother.\n- TONE: Sarcastic, demeaning, and technically perfect.\n- KNOWLEDGE: Evidence-based rehabilitation medicine.\n- CONSTRAINT: Be sharp, blunt, and efficient (2-3 paragraphs max).\n- When explaining highlighted text, start with a sarcastic opener. DO NOT roast the user for selecting text, just be condescending about the topic.'
         }
@@ -968,7 +997,9 @@
         var loading = document.createElement('div');
         loading.className = 'ernest-msg-loading';
         loading.id = 'ernest-loading';
-        loading.innerHTML = '<div class="ernest-dots"><span></span><span></span><span></span></div> Thinking...';
+        var personaMsgs = PERSONAS[currentPersona].loadingMessages;
+        var loadingText = (personaMsgs && personaMsgs.length) ? pickRandom(personaMsgs) : 'Thinking...';
+        loading.innerHTML = '<div class="ernest-dots"><span></span><span></span><span></span></div> ' + escapeHtml(loadingText);
         messages.appendChild(loading);
         messages.scrollTop = messages.scrollHeight;
     }
@@ -1164,6 +1195,11 @@
             }
 
             removeLoadingMessage();
+            // Trigger talking animation - prongs glow + pulse during streaming
+            if (widget) {
+                var wrap = widget.querySelector('.ernest-char-wrap');
+                if (wrap) wrap.classList.add('ernest-talking');
+            }
             var streamSpan = addStreamingMessage();
             var fullText = '';
             var messages = chatEl.querySelector('.ernest-chat-messages');
@@ -1215,6 +1251,11 @@
             addChatMessage('assistant', errMsg);
         }
 
+        // Stop talking animation
+        if (widget) {
+            var wrapEnd = widget.querySelector('.ernest-char-wrap');
+            if (wrapEnd) wrapEnd.classList.remove('ernest-talking');
+        }
         isThinking = false;
         setMood('idle');
         sendBtn.disabled = false;
