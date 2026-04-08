@@ -139,49 +139,118 @@
         }
     };
 
+    // Ernest's SVG - sourced directly from the EMG/NCS MascotUtils.js (src/utils/MascotUtils.js).
+    // Every path/coordinate is verbatim from the original so he's visually identical to the EMG app.
+    // Uses compact class names (.eo/.etc/.etw/.es) to keep the embedded template small; these are
+    // mapped to the same Tailwind-ish rules via the inline <style> in the defs.
     const SVG_TEMPLATE = `
-    <svg class="ernest-svg" viewBox="0 0 500 540" xmlns="http://www.w3.org/2000/svg">
+    <svg class="ernest-svg ernest-svg-char" viewBox="0 0 500 500" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <style>
                 .eo{stroke:#2a2d34;stroke-width:7;stroke-linejoin:round;stroke-linecap:round}
                 .eto{stroke:#2a2d34;stroke-width:9;stroke-linejoin:round;stroke-linecap:round}
-                .etc{fill:#88dded;font-family:'JetBrains Mono',monospace;font-weight:900}
-                .etw{fill:#fff;font-family:'JetBrains Mono',monospace;font-weight:900}
-                .es{fill:rgba(0,0,0,0.15)}
+                .etc{fill:#88dded;font-family:'JetBrains Mono','Nunito',monospace;font-weight:900}
+                .etw{fill:#fff;font-family:'JetBrains Mono','Nunito',monospace;font-weight:900}
+                .es{fill:rgba(0,0,0,0.15);mix-blend-mode:multiply}
+                .eh{fill:rgba(255,255,255,0.2);mix-blend-mode:screen}
             </style>
-            <filter id="ecel"><feOffset dx="12" dy="0" in="SourceAlpha" result="ho"/><feComposite operator="out" in="SourceAlpha" in2="ho" result="hc"/><feFlood flood-color="#fff" flood-opacity="0.35" result="hcl"/><feComposite operator="in" in="hcl" in2="hc" result="hl"/><feOffset dx="-12" dy="-12" in="SourceAlpha" result="so"/><feComposite operator="out" in="SourceAlpha" in2="so" result="sc"/><feFlood flood-color="#000" flood-opacity="0.3" result="scl"/><feComposite operator="in" in="scl" in2="sc" result="sh"/><feMerge result="sd"><feMergeNode in="sh"/><feMergeNode in="hl"/></feMerge><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="sd"/></feMerge></filter>
+            <filter id="ernest-cel-shading">
+                <feOffset dx="12" dy="0" in="SourceAlpha" result="hl-offset"/>
+                <feComposite operator="out" in="SourceAlpha" in2="hl-offset" result="hl-crescent"/>
+                <feFlood flood-color="#ffffff" flood-opacity="0.35" result="hl-color"/>
+                <feComposite operator="in" in="hl-color" in2="hl-crescent" result="highlight"/>
+                <feOffset dx="-12" dy="-12" in="SourceAlpha" result="sh-offset"/>
+                <feComposite operator="out" in="SourceAlpha" in2="sh-offset" result="sh-crescent"/>
+                <feFlood flood-color="#000000" flood-opacity="0.3" result="sh-color"/>
+                <feComposite operator="in" in="sh-color" in2="sh-crescent" result="shadow"/>
+                <feMerge result="shading">
+                    <feMergeNode in="shadow"/>
+                    <feMergeNode in="highlight"/>
+                </feMerge>
+                <feMerge>
+                    <feMergeNode in="SourceGraphic"/>
+                    <feMergeNode in="shading"/>
+                </feMerge>
+            </filter>
+            <clipPath id="ernest-mouth-cut">
+                <path d="M 175 315 C 175 315 210 325 245 315 C 245 355 175 355 175 315 Z"/>
+            </clipPath>
         </defs>
-        <g transform="translate(45,30)">
-            <g class="ernest-prong-l"><rect x="145" y="45" width="22" height="90" fill="#b0b5ba" class="eo"/><rect x="160" y="45" width="7" height="90" class="es"/><path d="M140 105H172V120H140Z" fill="#666" class="eo"/><circle cx="156" cy="45" r="11" fill="#b0b5ba" class="eo"/></g>
-            <g class="ernest-prong-r"><rect x="255" y="45" width="22" height="90" fill="#b0b5ba" class="eo"/><rect x="270" y="45" width="7" height="90" class="es"/><path d="M250 105H282V120H250Z" fill="#666" class="eo"/><circle cx="266" cy="45" r="11" fill="#b0b5ba" class="eo"/></g>
-            <g class="ernest-body">
-                <path d="M100 130C80 130 70 145 70 160L70 200C70 230 140 250 140 280L140 450C140 500 280 500 280 450L280 280C280 250 350 230 350 200L350 160C350 145 340 130 320 130Z" fill="#55595f" filter="url(#ecel)"/>
-                <path d="M70 165H60V195H70Z" fill="#606469" class="eo"/>
-                <path d="M100 130H320C340 130 350 145 350 160V185C350 210 270 230 210 230C150 230 70 210 70 185V160C70 145 80 130 100 130Z" fill="#80858b" filter="url(#ecel)"/>
-                <path d="M140 435Q210 445 280 435V450C280 500 140 500 140 450Z" fill="#606469" filter="url(#ecel)"/>
-                <path d="M100 130C80 130 70 145 70 160L70 200C70 230 140 250 140 280L140 450C140 500 280 500 280 450L280 280C280 250 350 230 350 200L350 160C350 145 340 130 320 130Z" fill="none" class="eto"/>
-                <path d="M100 130H320C340 130 350 145 350 160V185C350 210 270 230 210 230C150 230 70 210 70 185V160C70 145 80 130 100 130Z" fill="none" class="eo"/>
-                <path d="M140 435Q210 445 280 435V450C280 500 140 500 140 450Z" fill="none" class="eo"/>
+        <g transform="translate(45, 10)">
+            <g class="ernest-prong-l">
+                <rect x="145" y="45" width="22" height="90" fill="#b0b5ba" class="eo"/>
+                <rect x="160" y="45" width="7" height="90" class="es"/>
+                <path d="M 140 105 L 172 105 L 172 120 L 140 120 Z" fill="#666" class="eo"/>
+                <circle cx="156" cy="45" r="11" fill="#b0b5ba" class="eo"/>
             </g>
-            <path d="M125 145H295C315 145 325 152 325 165V180C325 205 260 220 210 220C160 220 95 205 95 180V165C95 152 105 145 125 145Z" fill="#2a2d34" class="eo"/>
+            <g class="ernest-prong-r">
+                <rect x="255" y="45" width="22" height="90" fill="#b0b5ba" class="eo"/>
+                <rect x="270" y="45" width="7" height="90" class="es"/>
+                <path d="M 250 105 L 282 105 L 282 120 L 250 120 Z" fill="#666" class="eo"/>
+                <circle cx="266" cy="45" r="11" fill="#b0b5ba" class="eo"/>
+            </g>
+
+            <g>
+                <path d="M 100 130 C 80 130 70 145 70 160 L 70 200 C 70 230 140 250 140 280 L 140 450 C 140 500 280 500 280 450 L 280 280 C 280 250 350 230 350 200 L 350 160 C 350 145 340 130 320 130 Z"
+                      fill="#55595f" filter="url(#ernest-cel-shading)"/>
+                <path d="M 70 165 L 60 165 L 60 195 L 70 195 Z" fill="#606469" class="eo"/>
+                <path d="M 100 130 L 320 130 C 340 130 350 145 350 160 L 350 185 C 350 210 270 230 210 230 C 150 230 70 210 70 185 L 70 160 C 70 145 80 130 100 130 Z"
+                      fill="#80858b" filter="url(#ernest-cel-shading)"/>
+                <path d="M 140 435 Q 210 445 280 435 L 280 450 C 280 500 140 500 140 450 Z"
+                      fill="#606469" filter="url(#ernest-cel-shading)"/>
+                <path d="M 100 130 C 80 130 70 145 70 160 L 70 200 C 70 230 140 250 140 280 L 140 450 C 140 500 280 500 280 450 L 280 280 C 280 250 350 230 350 200 L 350 160 C 350 145 340 130 320 130 Z"
+                      fill="none" class="eto"/>
+                <path d="M 100 130 L 320 130 C 340 130 350 145 350 160 L 350 185 C 350 210 270 230 210 230 C 150 230 70 210 70 185 L 70 160 C 70 145 80 130 100 130 Z"
+                      fill="none" class="eo"/>
+                <path d="M 140 435 Q 210 445 280 435 L 280 450 C 280 500 140 500 140 450 Z"
+                      fill="none" class="eo"/>
+            </g>
+
+            <path d="M 125 145 L 295 145 C 315 145 325 152 325 165 L 325 180 C 325 205 260 220 210 220 C 160 220 95 205 95 180 L 95 165 C 95 152 105 145 125 145 Z" fill="#2a2d34" class="eo"/>
+
             <rect x="110" y="160" width="16" height="8" rx="4" fill="#1e1f24" class="eo"/>
             <text x="135" y="172" class="etw" font-size="28">3</text>
             <text x="235" y="170" class="etw" font-size="20">+/-</text>
-            <circle class="ernest-led" cx="278" cy="162" r="7" class="eo" fill="#00ff4c"/><ellipse cx="278" cy="160" rx="3" ry="1.5" fill="#fff" opacity="0.6"/>
+            <circle cx="278" cy="162" r="7" class="eo ernest-led" fill="#00ff4c"/>
+            <ellipse cx="278" cy="160" rx="3" ry="1.5" fill="#fff" opacity="0.6"/>
             <text x="210" y="212" class="etc" font-size="28" letter-spacing="2" text-anchor="middle">STIM</text>
             <text x="210" y="375" class="etc" font-size="28" letter-spacing="2" text-anchor="middle">STORE</text>
             <text x="210" y="405" class="etc" font-size="24" text-anchor="middle">1</text>
             <text x="210" y="435" class="etc" font-size="24" text-anchor="middle">2</text>
             <circle cx="210" cy="465" r="18" fill="none" class="eo"/>
-            <path d="M190 465H202L206 452L214 478L218 465H230" fill="none" stroke="#2a2d34" stroke-width="5" stroke-linejoin="round"/>
-            <g class="ernest-face">
-                <g class="ernest-brows"><path d="M165 260Q180 245 195 250" fill="none" class="eo"/><path d="M255 260Q240 245 225 250" fill="none" class="eo"/></g>
-                <g class="ernest-eyes-open"><ellipse cx="180" cy="285" rx="12" ry="18" fill="#1e1f24"/><circle cx="183" cy="278" r="4" fill="#fff"/><ellipse cx="240" cy="285" rx="12" ry="18" fill="#1e1f24"/><circle cx="243" cy="278" r="4" fill="#fff"/></g>
-                <g class="ernest-eyes-closed" style="opacity:0"><path d="M168 285Q180 295 192 285" fill="none" class="eo"/><path d="M228 285Q240 295 252 285" fill="none" class="eo"/></g>
-                <rect x="203" y="283" width="14" height="24" rx="7" fill="#606469" class="eo"/><line x1="205" y1="289" x2="215" y2="289" stroke="#2a2d34" stroke-width="4" stroke-linecap="round"/><line x1="205" y1="295" x2="215" y2="295" stroke="#2a2d34" stroke-width="4" stroke-linecap="round"/><line x1="205" y1="301" x2="215" y2="301" stroke="#2a2d34" stroke-width="4" stroke-linecap="round"/>
-                <g class="ernest-mouth" transform="translate(78.5,108.75) scale(0.65)"><clipPath id="emc"><path d="M175 315C175 315 210 325 245 315C245 355 175 355 175 315Z"/></clipPath><path d="M175 315C175 315 210 325 245 315C245 355 175 355 175 315Z" fill="#141517" class="eo" stroke-linejoin="round"/><path d="M185 340Q210 315 235 340C235 365 185 365 185 340Z" fill="#ff7675" stroke="#2a2d34" stroke-width="2" clip-path="url(#emc)"/><path d="M168 310Q172 312 175 315" fill="none" class="eo"/><path d="M252 310Q248 312 245 315" fill="none" class="eo"/></g>
+            <path d="M 190 465 L 202 465 L 206 452 L 214 478 L 218 465 L 230 465" fill="none" stroke="#2a2d34" stroke-width="5" stroke-linejoin="round"/>
+
+            <g>
+                <g>
+                    <path d="M 165 260 Q 180 245 195 250" fill="none" class="eo"/>
+                    <path d="M 255 260 Q 240 245 225 250" fill="none" class="eo"/>
+                </g>
+                <g class="ernest-eyes-open">
+                    <ellipse cx="180" cy="285" rx="12" ry="18" fill="#1e1f24"/>
+                    <circle cx="183" cy="278" r="4" fill="#ffffff"/>
+                    <ellipse cx="240" cy="285" rx="12" ry="18" fill="#1e1f24"/>
+                    <circle cx="243" cy="278" r="4" fill="#ffffff"/>
+                </g>
+                <g class="ernest-eyes-closed" style="opacity:0">
+                    <path d="M 168 285 Q 180 295 192 285" fill="none" class="eo"/>
+                    <path d="M 228 285 Q 240 295 252 285" fill="none" class="eo"/>
+                </g>
+                <rect x="203" y="283" width="14" height="24" rx="7" fill="#606469" class="eo"/>
+                <line x1="205" y1="289" x2="215" y2="289" stroke="#2a2d34" stroke-width="4" stroke-linecap="round"/>
+                <line x1="205" y1="295" x2="215" y2="295" stroke="#2a2d34" stroke-width="4" stroke-linecap="round"/>
+                <line x1="205" y1="301" x2="215" y2="301" stroke="#2a2d34" stroke-width="4" stroke-linecap="round"/>
+                <g transform="translate(78.5, 108.75) scale(0.65)">
+                    <path d="M 175 315 C 175 315 210 325 245 315 C 245 355 175 355 175 315 Z" fill="#141517" class="eo" stroke-linejoin="round"/>
+                    <path d="M 185 340 Q 210 315 235 340 C 235 365 185 365 185 340 Z" fill="#ff7675" stroke="#2a2d34" stroke-width="2" clip-path="url(#ernest-mouth-cut)"/>
+                    <path d="M 168 310 Q 172 312 175 315" fill="none" class="eo"/>
+                    <path d="M 252 310 Q 248 312 245 315" fill="none" class="eo"/>
+                </g>
             </g>
-            <g class="ernest-zaps"><path d="M155 10L140-20 160-35 145-60" fill="none" stroke="#88dded" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M265 10L280-20 260-35 275-60" fill="none" stroke="#88dded" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>
+
+            <g class="ernest-zaps">
+                <path d="M 155 10 L 140 -20 L 160 -35 L 145 -60" fill="none" stroke="#88dded" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M 265 10 L 280 -20 L 260 -35 L 275 -60" fill="none" stroke="#88dded" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
             <g class="ernest-zs">
                 <text class="ernest-z1" x="320" y="80" font-family="JetBrains Mono, monospace" font-size="36" font-weight="900" fill="#88dded" stroke="#2a2d34" stroke-width="2">Z</text>
                 <text class="ernest-z2" x="335" y="60" font-family="JetBrains Mono, monospace" font-size="28" font-weight="900" fill="#88dded" stroke="#2a2d34" stroke-width="2">z</text>
@@ -190,29 +259,167 @@
         </g>
     </svg>`;
 
-    // Earl is built by substitution from Ernest's SVG so the two stay in sync structurally.
-    // Color palette shifts from cyan/steel to dark green-gray with red accents, eyes narrow, brows angry,
-    // screen shows ERR instead of the 3/STIM readout.
-    const EARL_SVG_TEMPLATE = SVG_TEMPLATE
-        .replace('class="ernest-svg"', 'class="ernest-svg earl-svg"')
-        .replace('fill:#88dded', 'fill:#ff6b6b')                                  // .etc class - labels red
-        .replace(/fill="#55595f"/g, 'fill="#3d4a42"')                             // main body
-        .replace(/fill="#80858b"/g, 'fill="#5a6760"')                             // top cap
-        .replace(/fill="#606469"/g, 'fill="#454f48"')                             // accents
-        .replace(/fill="#666"/g, 'fill="#3e4440"')                                // prong base
-        .replace(/fill="#b0b5ba"/g, 'fill="#8a9088"')                             // prong rods
-        .replace(/fill="#00ff4c"/g, 'fill="#ff3d00"')                             // LED green -> red
-        .replace(/fill="#ff7675"/g, 'fill="#5a1010"')                             // mouth red -> dark
-        .replace(/stroke="#88dded"/g, 'stroke="#ff3d00"')                         // zap lines
-        .replace(/fill="#88dded"/g, 'fill="#ff3d00"')                             // snoring Zs
-        .replace('<ellipse cx="180" cy="285" rx="12" ry="18" fill="#1e1f24"/>', '<ellipse cx="180" cy="287" rx="11" ry="8" fill="#1e1f24"/>')
-        .replace('<ellipse cx="240" cy="285" rx="12" ry="18" fill="#1e1f24"/>', '<ellipse cx="240" cy="287" rx="11" ry="8" fill="#1e1f24"/>')
-        .replace('<path d="M165 260Q180 245 195 250" fill="none" class="eo"/>', '<path d="M163 250Q180 268 197 258" fill="none" class="eo"/>')
-        .replace('<path d="M255 260Q240 245 225 250" fill="none" class="eo"/>', '<path d="M257 250Q240 268 223 258" fill="none" class="eo"/>')
-        .replace('<text x="135" y="172" class="etw" font-size="28">3</text>', '<text x="140" y="174" class="etw" font-size="22" fill="#ff3d00">ERR</text>')
-        .replace('<text x="235" y="170" class="etw" font-size="20">+/-</text>', '<text x="245" y="172" class="etw" font-size="18" fill="#ff3d00">!!</text>')
-        // Mouth: swap the smiling curve for a flat frown
-        .replace('<path d="M185 340Q210 315 235 340C235 365 185 365 185 340Z"', '<path d="M185 340Q210 355 235 340C235 365 185 365 185 340Z"');
+    // Earl's distinct SVG - sourced directly from the EMG/NCS MascotUtils.js
+    // (src/utils/MascotUtils.js) so he has his authentic damaged, olive-gray, angry
+    // appearance: chipped prongs with rust detail, ERROR screen with scratches,
+    // narrow clip-pathed eyes, angry V brows, asymmetric frown, battle-damaged body.
+    // Class names rewritten from .earl-* to .ernest-* where needed so the shared
+    // animation CSS (prong-l/r, led, eyes-open/closed, zs) plugs straight in.
+    const EARL_SVG_TEMPLATE = `
+    <svg class="ernest-svg earl-svg-char" viewBox="0 0 500 550" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="earl-body-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6a736e" />
+                <stop offset="50%" stop-color="#555d59" />
+                <stop offset="100%" stop-color="#3b423f" />
+            </linearGradient>
+            <linearGradient id="earl-screen-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#4c5c44" />
+                <stop offset="100%" stop-color="#3a4734" />
+            </linearGradient>
+            <linearGradient id="earl-gloss-grad" x1="0%" y1="0%" x2="50%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+            </linearGradient>
+            <clipPath id="earl-left-eye-clip">
+                <path d="M 185 268 Q 210 280 235 268 L 235 310 L 185 310 Z" />
+            </clipPath>
+            <clipPath id="earl-right-eye-clip">
+                <path d="M 265 268 Q 290 280 315 268 L 315 310 L 265 310 Z" />
+            </clipPath>
+        </defs>
+
+        <g class="ernest-zs">
+            <text class="ernest-z1" x="320" y="150" font-family="JetBrains Mono, monospace" font-weight="900" font-size="30" fill="#ff6666" stroke="#1a1c1a" stroke-width="2">Z</text>
+            <text class="ernest-z2" x="360" y="110" font-family="JetBrains Mono, monospace" font-weight="900" font-size="24" fill="#ff6666" stroke="#1a1c1a" stroke-width="2">z</text>
+            <text class="ernest-z3" x="390" y="80" font-family="JetBrains Mono, monospace" font-weight="900" font-size="20" fill="#ff6666" stroke="#1a1c1a" stroke-width="2">z</text>
+        </g>
+
+        <g class="ernest-prong-l">
+            <rect x="180" y="40" width="16" height="80" fill="#787d7a" stroke="#1a1c1a" stroke-width="4"/>
+            <circle cx="188" cy="40" r="12" fill="#787d7a" stroke="#1a1c1a" stroke-width="4"/>
+            <rect x="182" y="45" width="4" height="70" fill="#ffffff" opacity="0.3"/>
+            <path d="M 182 50 Q 186 45 194 52 L 194 62 Q 186 65 182 58 Z" fill="#4a2010"/>
+            <path d="M 184 52 Q 188 48 192 53 L 192 60 Q 188 62 184 56 Z" fill="#8c3e16"/>
+            <path d="M 182 85 Q 188 80 194 88 L 194 95 L 182 95 Z" fill="#4a2010"/>
+        </g>
+        <g class="ernest-prong-r">
+            <rect x="304" y="40" width="16" height="80" fill="#787d7a" stroke="#1a1c1a" stroke-width="4"/>
+            <circle cx="312" cy="40" r="12" fill="#787d7a" stroke="#1a1c1a" stroke-width="4"/>
+            <rect x="306" y="45" width="4" height="70" fill="#ffffff" opacity="0.3"/>
+            <path d="M 306 70 Q 312 65 318 75 L 318 90 Q 310 95 306 85 Z" fill="#4a2010"/>
+            <path d="M 308 73 Q 312 68 316 76 L 316 88 Q 312 91 308 83 Z" fill="#8c3e16"/>
+            <path d="M 306 45 Q 314 42 318 48 L 318 55 L 306 50 Z" fill="#4a2010"/>
+        </g>
+
+        <g>
+            <path d="M 110 160 C 110 110, 140 100, 180 100 L 320 100 C 360 100, 390 110, 390 160 C 390 200, 350 210, 330 240 C 320 255, 320 280, 320 300 L 320 480 C 320 530, 280 540, 250 540 C 220 540, 180 530, 180 480 L 180 300 C 180 280, 180 255, 170 240 C 150 210, 110 200, 110 160 Z"
+                  fill="url(#earl-body-grad)" stroke="#1a1c1a" stroke-width="8" stroke-linejoin="round"/>
+            <path d="M 120 160 C 120 120, 145 110, 180 110 L 320 110 C 340 110, 355 115, 365 125 M 120 160 C 120 190, 155 205, 175 235 C 185 250, 190 270, 190 300 L 190 480 C 190 515, 215 530, 250 530"
+                  fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.2"/>
+            <path d="M 250 530 C 285 530, 310 515, 310 480 L 310 300 C 310 270, 315 250, 325 235 C 345 205, 380 190, 380 160 C 380 135, 365 118, 340 112"
+                  fill="none" stroke="#000000" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
+
+            <g>
+                <path d="M 388 150 Q 375 160 380 175 Q 392 165 388 150 Z" fill="#4a2010"/>
+                <path d="M 385 153 Q 378 160 382 170 Q 388 163 385 153 Z" fill="#8c3e16"/>
+            </g>
+            <g>
+                <path d="M 315 470 Q 305 480 310 500 Q 325 490 315 470 Z" fill="#4a2010"/>
+                <path d="M 313 475 Q 308 482 311 495 Q 320 488 313 475 Z" fill="#8c3e16"/>
+            </g>
+
+            <g stroke-linecap="round">
+                <path d="M 185 412 L 210 452 M 205 412 L 185 447" stroke="#ffffff" stroke-width="3" opacity="0.3"/>
+                <path d="M 185 410 L 210 450 M 205 410 L 185 445" stroke="#1a1c1a" stroke-width="4" opacity="0.8"/>
+                <path d="M 315 412 L 290 452 M 295 412 L 315 447" stroke="#ffffff" stroke-width="3" opacity="0.3"/>
+                <path d="M 315 410 L 290 450 M 295 410 L 315 445" stroke="#1a1c1a" stroke-width="4" opacity="0.8"/>
+                <path d="M 230 482 L 245 497" stroke="#ffffff" stroke-width="2" opacity="0.3"/>
+                <path d="M 230 480 L 245 495" stroke="#1a1c1a" stroke-width="2.5" opacity="0.7"/>
+            </g>
+
+            <g font-family="JetBrains Mono, monospace" font-weight="bold" fill="#2a302d" opacity="0.4" text-anchor="middle">
+                <text x="250" y="235" font-size="44" letter-spacing="4">STIM</text>
+                <text x="250" y="390" font-size="38" letter-spacing="3">STORE</text>
+                <text x="250" y="430" font-size="34">1</text>
+                <text x="250" y="470" font-size="34">2</text>
+            </g>
+
+            <g stroke="#1a1c1a" stroke-width="5" fill="none">
+                <circle cx="250" cy="515" r="22" fill="#4a524e" opacity="0.5"/>
+                <circle cx="250" cy="515" r="22" />
+                <path d="M 228 515 L 240 515 L 245 498 L 255 532 L 260 515 L 272 515" stroke-linejoin="miter"/>
+            </g>
+
+            <g>
+                <path d="M 125 130 L 375 130 C 385 130, 385 180, 375 180 L 125 180 C 115 180, 115 130, 125 130 Z"
+                      fill="url(#earl-screen-grad)" stroke="#1a1c1a" stroke-width="6" stroke-linejoin="round"/>
+                <path d="M 125 130 L 375 130 C 385 130, 385 180, 375 180 L 125 180 C 115 180, 115 130, 125 130 Z"
+                      fill="none" stroke="#11150f" stroke-width="8" opacity="0.6"/>
+                <text x="165" y="166" font-family="monospace, sans-serif" font-size="36" font-weight="bold" fill="#222b1c" opacity="0.9" letter-spacing="5">ERROR</text>
+
+                <g stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M 145 145 L 130 135 M 145 145 L 135 165 L 140 180 M 145 145 L 165 155 L 180 145 M 165 155 L 175 170" stroke="#777777" stroke-width="1.5" fill="none" opacity="0.4"/>
+                    <path d="M 355 165 L 370 175 M 355 165 L 345 145 L 330 135 M 355 165 L 335 170 L 310 160 M 345 145 L 350 130" stroke="#777777" stroke-width="1.5" fill="none" opacity="0.4"/>
+                    <path d="M 144 144 L 129 134 M 144 144 L 134 164 L 139 179 M 144 144 L 164 154 L 179 144 M 164 154 L 174 169" stroke="#1a1c1a" stroke-width="2.5" fill="none"/>
+                    <path d="M 354 164 L 369 174 M 354 164 L 344 144 L 329 134 M 354 164 L 334 169 L 309 159 M 344 144 L 349 129" stroke="#1a1c1a" stroke-width="2.5" fill="none"/>
+                    <circle cx="144" cy="144" r="2" fill="#1a1c1a"/>
+                    <circle cx="354" cy="164" r="2" fill="#1a1c1a"/>
+                </g>
+
+                <path d="M 125 130 L 375 130 C 380 130, 383 135, 383 140 L 122 170 C 120 160, 115 130, 125 130 Z" fill="url(#earl-gloss-grad)"/>
+
+                <circle class="ernest-led" cx="365" cy="155" r="7" stroke="#1a1c1a" stroke-width="3" fill="#ff0000"/>
+                <path d="M 360 152 A 5 5 0 0 1 368 152" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.5"/>
+            </g>
+
+            <g>
+                <path d="M 180 250 Q 250 270 320 250 L 320 290 Q 250 310 180 290 Z" fill="#2c3330" opacity="0.3"/>
+                <g class="ernest-eyes-open">
+                    <g>
+                        <g clip-path="url(#earl-left-eye-clip)">
+                            <circle cx="210" cy="275" r="18" fill="#e8e4d3" stroke="#1a1c1a" stroke-width="4"/>
+                            <circle cx="212" cy="275" r="6" fill="#1a1c1a"/>
+                            <circle cx="210" cy="275" r="18" fill="none" stroke="#2c3330" stroke-width="4" opacity="0.4"/>
+                        </g>
+                        <path d="M 188 268 Q 210 280 232 268" fill="none" stroke="#1a1c1a" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M 194 298 Q 210 306 226 298" fill="none" stroke="#2c3330" stroke-width="3" stroke-linecap="round"/>
+                    </g>
+                    <g>
+                        <g clip-path="url(#earl-right-eye-clip)">
+                            <circle cx="290" cy="275" r="18" fill="#e8e4d3" stroke="#1a1c1a" stroke-width="4"/>
+                            <circle cx="288" cy="275" r="6" fill="#1a1c1a"/>
+                            <circle cx="290" cy="275" r="18" fill="none" stroke="#2c3330" stroke-width="4" opacity="0.4"/>
+                        </g>
+                        <path d="M 268 268 Q 290 280 312 268" fill="none" stroke="#1a1c1a" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M 274 298 Q 290 306 306 298" fill="none" stroke="#2c3330" stroke-width="3" stroke-linecap="round"/>
+                    </g>
+                </g>
+                <g class="ernest-eyes-closed" style="opacity:0">
+                    <path d="M 188 275 Q 210 285 232 275" fill="none" stroke="#1a1c1a" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M 268 275 Q 290 285 312 275" fill="none" stroke="#1a1c1a" stroke-width="4" stroke-linecap="round"/>
+                </g>
+
+                <g stroke-linecap="round">
+                    <path d="M 180 255 Q 210 245 242 275" fill="none" stroke="#262b28" stroke-width="8"/>
+                    <path d="M 320 255 Q 290 245 258 275" fill="none" stroke="#262b28" stroke-width="8"/>
+                </g>
+
+                <path d="M 245 275 C 235 275, 235 295, 250 295 C 255 295, 260 290, 260 285" fill="none" stroke="#1a1c1a" stroke-width="4" stroke-linecap="round"/>
+
+                <g>
+                    <path d="M 185 325 Q 250 300 315 325" fill="none" stroke="#1a1c1a" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M 180 315 Q 175 325 190 332" fill="none" stroke="#1a1c1a" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M 320 315 Q 325 325 310 332" fill="none" stroke="#1a1c1a" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M 230 322 Q 250 315 270 322" fill="none" stroke="#2c3330" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+                </g>
+            </g>
+        </g>
+        <g class="ernest-zaps">
+            <path d="M 188 20 L 175 -10 L 195 -25 L 180 -50" fill="none" stroke="#ff3d00" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M 312 20 L 325 -10 L 305 -25 L 320 -50" fill="none" stroke="#ff3d00" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+    </svg>`;
 
     const STYLES = `
     <style id="ernest-module-styles">
