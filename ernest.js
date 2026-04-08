@@ -505,6 +505,52 @@
     }
     </style>`;
 
+    // ===== REFLEXES (instant in-character responses, no API call) =====
+    // Keys are lowercase. Match runs against full lowercased query, exact word boundary.
+    const REFLEXES = {
+        // PM&R high-frequency
+        'asia':            { ernest: "ASIA scale! The American Spinal Injury Association impairment scale - your gold standard for SCI classification. A=complete, E=normal. Always check sacral sparing!", earl: "ASIA. The exam every resident pretends to remember and then fumbles at the bedside. Sacral sparing. Light touch AND pinprick. Try not to skip it." },
+        'dermatomes':      { ernest: "Dermatomes! C5 deltoid patch, C6 thumb, C7 middle finger, C8 pinky, T4 nipples, T10 umbilicus, L4 medial calf, L5 dorsum of foot, S1 lateral foot. The map of the body!", earl: "Dermatomes. The thing you'll mix up under pressure. T4 nipples. T10 umbilicus. L1 inguinal. Memorize them or be useless." },
+        'myotomes':        { ernest: "Myotomes! C5 elbow flex, C6 wrist ext, C7 elbow ext, C8 finger flex, T1 finger abd, L2 hip flex, L3 knee ext, L4 ankle dorsi, L5 great toe ext, S1 plantar flex.", earl: "Myotomes. If you can't recite them by C-level you have no business near a spinal cord patient." },
+        'fim':             { ernest: "FIM - Functional Independence Measure! 18 items, 7-point scale (1=total assist, 7=complete independence). Motor + cognitive subscales. Used for rehab progress.", earl: "FIM. An 18-item ordinal score that everyone games to justify length of stay. Useful, sure. Pure? No." },
+        'mmt':             { ernest: "Manual Muscle Testing! 0=no contraction, 1=flicker, 2=move with gravity eliminated, 3=full ROM against gravity, 4=against some resistance, 5=normal strength.", earl: "MMT. Subjective. Inter-rater reliability is mediocre. But you'll grade it anyway, so do it consistently. 0 to 5. Don't say '4 plus.'" },
+        'rom':             { ernest: "Range of Motion! Active vs passive. Document in degrees. Compare to contralateral. Always note end-feel - bony, soft, capsular, empty.", earl: "Range of motion. Active and passive. If you can't tell the difference between hard end-feel and empty end-feel you're guessing." },
+        'gait':            { ernest: "Gait analysis! Stance phase 60%, swing 40%. Watch for Trendelenburg, foot drop, antalgic, ataxic, spastic, scissoring. Each tells a neuro story.", earl: "Gait. Stance 60, swing 40. Watch the patient walk before you touch them. Most diagnoses walk in the door." },
+        'orthostasis':     { ernest: "Orthostatic hypotension! Drop of >=20 SBP or >=10 DBP within 3 min of standing. Common in SCI above T6, autonomic dysfunction, or volume depletion.", earl: "Orthostasis. Twenty systolic or ten diastolic. Three minutes. If you didn't wait the three minutes you didn't measure it." },
+        'autonomic dysreflexia': { ernest: "Autonomic Dysreflexia! Emergency in SCI above T6! HTN spike, headache, sweating above lesion. Find the noxious stimulus - usually bladder or bowel. Sit up, loosen, drain catheter!", earl: "AD. Above T6. You have minutes before they stroke out. Sit them up. Loosen everything. Find the noxious stimulus. Usually a kinked Foley. It's always the Foley." },
+        'spasticity':      { ernest: "Spasticity! Velocity-dependent increase in tonic stretch reflex. Modified Ashworth Scale 0-4. Treatment ladder: stretching, oral meds, botox, ITB pump, surgery.", earl: "Spasticity. Velocity dependent. That's the WHOLE definition. If it's not velocity dependent it's rigidity. Don't conflate them." },
+        'baclofen':        { ernest: "Baclofen! GABA-B agonist for spasticity. Oral 5-80mg/day TID. ITB pump for severe cases. Watch for sedation, weakness, and NEVER stop abruptly - withdrawal is life-threatening.", earl: "Baclofen. GABA-B. If you stop it abruptly the patient seizes, hallucinates, and can die. Taper. Always taper." },
+        'botox':           { ernest: "Botulinum toxin! Cleaves SNAP-25, blocks ACh release at NMJ. Onset 3-5 days, peak 2 weeks, duration 3-4 months. Dose units vary - onabotA != aboboA.", earl: "Botox. SNAP-25. Don't interchange the brands. The unit conversions are wrong and you'll under or overdose." },
+        'phenol':          { ernest: "Phenol nerve block! Chemical neurolysis. Cheaper and longer than botox but motor point or nerve trunk delivery, dysesthesia risk, and skill-dependent.", earl: "Phenol. Old-school. Cheap. Painful injection. Causes dysesthesias. Use it when botox is contraindicated or too expensive." },
+        'modified ashworth': { ernest: "Modified Ashworth Scale! 0=no increase, 1=catch and release, 1+=catch + minimal resistance through <half ROM, 2=more marked, 3=considerable, 4=rigid.", earl: "Ashworth. Subjective. The 1+ category was added because the original scale wasn't granular enough. It's still bad. Use it anyway." },
+        'tardieu':         { ernest: "Tardieu Scale! Better than Ashworth because it accounts for velocity. V1=slow, V2=gravity, V3=fast. Compares angle of catch at different speeds.", earl: "Tardieu. Velocity dependent which is the whole point of measuring spasticity. Why we still use Ashworth more is anyone's guess." },
+        'emg':             { ernest: "Electromyography! Needle EMG looks at motor unit action potentials. Insertional activity, spontaneous activity (fibs/PSWs), recruitment, MUAP morphology.", earl: "EMG. Needle in muscle. Insertional, spontaneous, voluntary. If you don't understand recruitment patterns you can't read it. Period." },
+        'ncs':             { ernest: "Nerve Conduction Study! Stimulate, record. Latency, amplitude, conduction velocity. Demyelination slows velocity, axonal loss drops amplitude.", earl: "NCS. Demyelination drops velocity. Axonal loss drops amplitude. If you remember nothing else, remember that." },
+        'fibs':             { ernest: "Fibrillation potentials! Spontaneous discharges from denervated muscle fibers. Take 2-4 weeks to appear. Hallmark of denervation.", earl: "Fibrillations. Two to four weeks post-denervation. If you needle a patient day 3 and don't see them you haven't ruled out anything." },
+        'psw':             { ernest: "Positive Sharp Waves! Like fibs - spontaneous activity from denervated muscle. Same significance. Diphasic, positive deflection then long negative.", earl: "PSWs. Same significance as fibs. Different morphology. Don't grade them separately like they mean different things." },
+        'cmap':            { ernest: "Compound Muscle Action Potential! Sum of all motor unit responses to nerve stimulation. Amplitude reflects axon count. Latency reflects fastest conducting fibers.", earl: "CMAP. Amplitude = axons. Latency = fastest fibers. If amplitude drops the axons died. It's not complicated." },
+        'snap':            { ernest: "Sensory Nerve Action Potential! Smaller than CMAP, more sensitive to early neuropathy. Absent SNAPs = postganglionic lesion (radiculopathies spare SNAPs).", earl: "SNAPs. Spared in radiculopathy because the lesion is preganglionic. If the SNAP is gone, it's NOT a radic." },
+        'h reflex':        { ernest: "H-reflex! Monosynaptic reflex, electrical analog of ankle jerk. S1 root function. Absent or delayed in S1 radiculopathy.", earl: "H reflex. S1. If it's gone bilaterally, that's age. If it's gone unilaterally, that's pathology." },
+        'f wave':          { ernest: "F-wave! Late response from antidromic stimulation activating anterior horn cells. Tests proximal nerve segments. Useful in early GBS.", earl: "F-waves. Antidromic. Proximal. Early GBS. Boring physics, useful clinically." },
+        'gbs':             { ernest: "Guillain-Barre! Acute inflammatory demyelinating polyneuropathy. Ascending weakness, areflexia, albuminocytologic dissociation in CSF. IVIG or PLEX.", earl: "GBS. Ascending. Areflexia. Don't wait for the LP if the clinical picture is obvious. IVIG or plasmapheresis. Steroids do NOTHING here." },
+        'cidp':            { ernest: "Chronic Inflammatory Demyelinating Polyneuropathy! Like GBS but >8 weeks. Responds to steroids, IVIG, or PLEX. Check for symmetric proximal AND distal weakness.", earl: "CIDP. Eight weeks or more. The slow cousin of GBS. Steroids actually work here. That's the only difference that matters for treatment." },
+        'als':             { ernest: "Amyotrophic Lateral Sclerosis! Combined UMN + LMN signs without sensory involvement. EMG shows widespread fibs/PSWs in 3+ regions. Riluzole, edaravone.", earl: "ALS. UMN plus LMN. No sensory. Three of four regions on EMG. The diagnosis nobody wants to make and nobody wants to receive." },
+        'tbi':             { ernest: "Traumatic Brain Injury! GCS <=8 severe, 9-12 moderate, 13-15 mild. Watch for autonomic storming, dysphagia, agitation. Rancho Los Amigos for cognitive recovery.", earl: "TBI. GCS is a starting point not the diagnosis. Rancho scale matters more for rehab planning. Learn it." },
+        'rancho':          { ernest: "Rancho Los Amigos Scale! 8 levels of cognitive recovery from coma to purposeful behavior. Useful framework for TBI rehab planning.", earl: "Rancho. Eight levels. Memorize them. They drive your rehab plan whether you admit it or not." },
+        'cva':             { ernest: "Cerebrovascular Accident! Ischemic 87%, hemorrhagic 13%. Time is brain. tPA window 4.5h, thrombectomy up to 24h with imaging selection.", earl: "CVA. Time is brain. Stop calling it a stroke and call it what it is to the family. They need to understand." },
+        'nihss':           { ernest: "NIH Stroke Scale! 15-item, 0-42. Measures stroke severity. >=6 typically thrombectomy candidates. Memorize the items - LOC, gaze, visual fields, facial palsy, motor, sensory, language, dysarthria, neglect.", earl: "NIHSS. Fifteen items. If you can't do it from memory at the bedside you have no business calling neurology." },
+        'mri':             { ernest: "MRI! Magnetic Resonance Imaging. T1 anatomy, T2 fluid bright, FLAIR for white matter lesions, DWI for acute stroke. No radiation but check for pacemakers and implants.", earl: "MRI. The 'Millionaire's Rorschach Image.' Useless for functional diagnostics. Order it when the question is anatomical." },
+        'ortho':           { ernest: "Orthopedics! Structural specialists - fractures, joints, hardware. Excellent partners for post-surgical rehab planning.", earl: "Orthopedics. Bone Carpenters. Strong as an ox and nearly as smart. We get the patients after they break things." },
+        '60hz':            { ernest: "60Hz interference! The song of the power grid. Check your ground, your prep, your cables. Common artifact in EMG/NCS recordings.", earl: "60Hz noise. The sound of incompetence. Check your ground. Check your patient. Check yourself." },
+        'cuccurullo':      { ernest: "Cuccurullo! THE PM&R board review book. The blue bible. If it's not in Cuccurullo it's probably not on the boards.", earl: "Cuccurullo. The book you should have read before showing up. If you're asking me what's in it you haven't read it." },
+        'delisas':         { ernest: "DeLisa's Physical Medicine and Rehabilitation! The comprehensive PM&R reference textbook. Deep dives on every topic.", earl: "DeLisa. Five pounds. Two volumes. Read the chapter you need. Don't try to read the whole thing." },
+        'preston shapiro': { ernest: "Preston and Shapiro! THE EMG/NCS reference book. Pattern-based approach. Every electromyographer needs it.", earl: "Preston and Shapiro. If you're doing electrodiagnostics without it you're guessing." },
+        // Module-specific shortcuts (used on landing page)
+        'where do i start':{ ernest: "Great question! On the landing page you can see all 12 modules. If you're starting PM&R study, hit Midnight Board Review or Oral Boards. If you're prepping for a procedure, US Guided Injections or Interventional Spine. Want me to recommend based on a topic?", earl: "Where to start? Pick a module. Click it. They all work. Stop overthinking it." },
+        'what should i learn': { ernest: "Depends on your goal! Boards prep -> Midnight Board Review + PMR Flashcards. Procedures -> US Guided Injections, Interventional Spine, Spasticity. Inpatient rotations -> SCI, TBI, CVA, Peds Rehab. Tell me what rotation you're on and I'll narrow it!", earl: "What should you learn? Whatever you're weakest at. Which is presumably everything. Pick a module." },
+        'help':            { ernest: "I'm here to help! Highlight any text on a page and click the tooltip to ask me about it. Or click my body to open the chat. I know PM&R, EMG, rehab medicine, and the modules in this hub.", earl: "Help. Right. Highlight text. Click me. Type a question. It's not complicated." }
+    };
+
     // ===== STATE =====
     let currentPersona = 'ernest';
     let currentMood = 'idle';
@@ -518,6 +564,7 @@
     let isThinking = false;
     let apiKey = null;
     let config = {};
+    let pageContext = '';
 
     function pickRandom(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
@@ -527,6 +574,69 @@
         var d = document.createElement('div');
         d.textContent = s;
         return d.innerHTML;
+    }
+
+    // ===== REFLEX MATCHING =====
+    // Returns the canned response for the current persona if any reflex key matches the query, else null.
+    // Matches are case-insensitive and prefer the LONGEST matching key (so "modified ashworth" wins over "ashworth").
+    function checkReflex(query) {
+        if (!query) return null;
+        var lower = query.toLowerCase();
+        var matched = null;
+        var matchedLen = 0;
+        for (var key in REFLEXES) {
+            if (!REFLEXES.hasOwnProperty(key)) continue;
+            // Word-boundary-ish check: key must be surrounded by non-letters or string edges
+            var idx = lower.indexOf(key);
+            if (idx === -1) continue;
+            var before = idx === 0 ? ' ' : lower.charAt(idx - 1);
+            var after = (idx + key.length) >= lower.length ? ' ' : lower.charAt(idx + key.length);
+            if (/[a-z0-9]/.test(before) || /[a-z0-9]/.test(after)) continue;
+            if (key.length > matchedLen) {
+                matched = REFLEXES[key];
+                matchedLen = key.length;
+            }
+        }
+        return matched ? (matched[currentPersona] || matched.ernest) : null;
+    }
+
+    // ===== PAGE CONTEXT =====
+    // Builds a description of the current page that gets injected into the system prompt.
+    // Three sources, in priority order:
+    //   1. config.context  (string)  - explicit override
+    //   2. config.contextSelector (CSS) - extract data from DOM elements
+    //   3. fallback: just the document title
+    function buildPageContext() {
+        if (config.context && typeof config.context === 'string') {
+            return config.context;
+        }
+
+        var parts = [];
+        var title = (document.title || '').trim();
+        if (title) parts.push('Page title: "' + title + '"');
+
+        var selector = config.contextSelector || '.card';
+        var nodes = document.querySelectorAll(selector);
+        if (nodes && nodes.length) {
+            var modules = [];
+            for (var i = 0; i < nodes.length && i < 30; i++) {
+                var n = nodes[i];
+                var titleEl = n.querySelector('.card-title') || n.querySelector('h1, h2, h3, h4');
+                var descEl = n.querySelector('.card-desc') || n.querySelector('p');
+                var href = n.getAttribute('href') || '';
+                if (titleEl) {
+                    var line = '- ' + titleEl.textContent.trim();
+                    if (descEl) line += ': ' + descEl.textContent.trim();
+                    if (href) line += ' (' + href + ')';
+                    modules.push(line);
+                }
+            }
+            if (modules.length) {
+                parts.push('Available modules on this page:\n' + modules.join('\n'));
+            }
+        }
+
+        return parts.join('\n\n');
     }
 
     // ===== INIT =====
@@ -547,6 +657,8 @@
 
         currentPersona = config.persona;
         apiKey = config.apiKey || localStorage.getItem('ernest-api-key');
+        // Build page context once on init. Apps that re-render content can call Ernest.refreshContext() later.
+        pageContext = buildPageContext();
 
         if (!document.getElementById('ernest-module-styles')) {
             document.head.insertAdjacentHTML('beforeend', STYLES);
@@ -787,11 +899,20 @@
 
     function handleHighlightExplain(text) {
         openChat();
-
-        var opener = pickRandom(PERSONAS[currentPersona].highlightOpeners);
         addChatMessage('user', '"' + text + '"');
 
-        var query = '[HIGHLIGHT_MODE]: "' + text + '"\n(Instruction: The user highlighted this text for an explanation. Start with "' + opener + '" then provide a concise 2-3 sentence clinical high-yield explanation in your persona.)';
+        // Check reflexes first - instant response, no API call
+        var reflex = checkReflex(text);
+        if (reflex) {
+            var opener = pickRandom(PERSONAS[currentPersona].highlightOpeners);
+            addChatMessage('assistant', opener + ' ' + reflex);
+            conversationHistory.push({ role: 'user', parts: [{ text: text }] });
+            conversationHistory.push({ role: 'model', parts: [{ text: reflex }] });
+            return;
+        }
+
+        var openerText = pickRandom(PERSONAS[currentPersona].highlightOpeners);
+        var query = '[HIGHLIGHT_MODE]: "' + text + '"\n(Instruction: The user highlighted this text for an explanation. Start with "' + openerText + '" then provide a concise 2-3 sentence clinical high-yield explanation in your persona.)';
 
         conversationHistory.push({ role: 'user', parts: [{ text: query }] });
         callGemini(query);
@@ -801,6 +922,15 @@
         if (!text || isThinking) return;
 
         addChatMessage('user', text);
+
+        // Check reflexes first - instant response, no API call
+        var reflex = checkReflex(text);
+        if (reflex) {
+            addChatMessage('assistant', reflex);
+            conversationHistory.push({ role: 'user', parts: [{ text: text }] });
+            conversationHistory.push({ role: 'model', parts: [{ text: reflex }] });
+            return;
+        }
 
         var query = isHighlight
             ? '[HIGHLIGHT_MODE]: "' + text + '"\n(Instruction: Explain this highlighted text.)'
@@ -847,9 +977,15 @@
         var persona = PERSONAS[currentPersona];
         var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + config.geminiModel + ':streamGenerateContent?alt=sse&key=' + apiKey;
 
+        // Build system prompt: persona + page context (if any)
+        var fullSystemPrompt = persona.systemPrompt;
+        if (pageContext) {
+            fullSystemPrompt += '\n\nPAGE CONTEXT (where the user currently is):\n' + pageContext + '\n\nUse this context to give relevant answers. If the user asks "what should I learn" or "where do I start" or about modules, recommend specific modules from the list above.';
+        }
+
         var body = {
             contents: conversationHistory.slice(-10),
-            systemInstruction: { parts: [{ text: persona.systemPrompt }] },
+            systemInstruction: { parts: [{ text: fullSystemPrompt }] },
             generationConfig: { maxOutputTokens: 1024, temperature: 0.7 }
         };
 
@@ -1068,6 +1204,15 @@
         if (setup) setup.remove();
     }
 
+    function refreshContext() {
+        pageContext = buildPageContext();
+        return pageContext;
+    }
+
+    function addReflex(key, ernestText, earlText) {
+        REFLEXES[key.toLowerCase()] = { ernest: ernestText, earl: earlText || ernestText };
+    }
+
     // ===== PUBLIC API =====
     window.Ernest = {
         init: createWidget,
@@ -1082,8 +1227,11 @@
         ask: ask,
         setApiKey: setApiKey,
         destroy: destroy,
+        refreshContext: refreshContext,
+        addReflex: addReflex,
         get persona() { return currentPersona; },
         get mood() { return currentMood; },
-        get chatOpen() { return isChatOpen(); }
+        get chatOpen() { return isChatOpen(); },
+        get context() { return pageContext; }
     };
 })();
