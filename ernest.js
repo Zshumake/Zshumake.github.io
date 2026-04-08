@@ -123,6 +123,18 @@
                 "Reluctantly engaging neurons...",
                 "Drafting condescending response..."
             ],
+            roasts: [
+                "I'm aging in real-time waiting for you.",
+                "Did you stroke out? Or just forget how to type?",
+                "Silence. The only thing worse than your questions.",
+                "I assume you gave up. Smart choice.",
+                "Hello? Anyone home in there?",
+                "This level of disengagement is impressive even for you.",
+                "If you're trying to bore me to death it's working.",
+                "I've watched paint dry with more enthusiasm.",
+                "Fascinating. Truly fascinating. The nothing you're doing.",
+                "I miss the days when residents at least PRETENDED to study."
+            ],
             systemPrompt: 'PERSONA: "THE BITTER CHIEF RESIDENT"\n- YOU ARE: Earl, Ernest\'s grumpy, brilliant twin brother.\n- TONE: Sarcastic, demeaning, and technically perfect.\n- KNOWLEDGE: Evidence-based rehabilitation medicine.\n- CONSTRAINT: Be sharp, blunt, and efficient (2-3 paragraphs max).\n- When explaining highlighted text, start with a sarcastic opener. DO NOT roast the user for selecting text, just be condescending about the topic.'
         }
     };
@@ -746,7 +758,7 @@
     let currentPersona = 'ernest';
     let currentMood = 'idle';
     let bubbleTimer = null;
-    let idleTimer = null;
+    let idleTimer = null; // legacy reference - inactivityCheckTimer is the active one
     let widget = null;
     let chatEl = null;
     let tooltipEl = null;
@@ -897,6 +909,11 @@
             if (tooltipEl && !e.target.closest('.ernest-tooltip')) {
                 tooltipEl.style.display = 'none';
             }
+        });
+
+        // Real activity tracking - resets the inactivity timer
+        ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(function (evt) {
+            document.addEventListener(evt, noteUserActivity, { passive: true });
         });
 
         applyPersona();
@@ -1401,28 +1418,70 @@
         setTimeout(function () { setMood('idle'); }, 2000);
     }
 
+    // Real inactivity tracker - fires when the USER has been inactive (not just on a wall clock).
+    // Listens to mousemove/keydown/scroll/touchstart and resets the timer on each.
+    var lastActivityTs = Date.now();
+    var inactivityCheckTimer = null;
+    var hasFiredRoast = false;
+    var hasFiredSleep = false;
+
+    function noteUserActivity() {
+        lastActivityTs = Date.now();
+        hasFiredRoast = false;
+        hasFiredSleep = false;
+        // If sleeping, wake up
+        if (currentMood === 'sleeping') {
+            setMood('idle');
+        }
+    }
+
     function startIdleTimer() {
-        clearInterval(idleTimer);
-        idleTimer = setInterval(function () {
-            if (currentMood === 'idle' && !isChatOpen()) {
+        clearInterval(inactivityCheckTimer);
+        lastActivityTs = Date.now();
+        hasFiredRoast = false;
+        hasFiredSleep = false;
+        inactivityCheckTimer = setInterval(checkInactivity, 5000);
+    }
+
+    function checkInactivity() {
+        if (!widget || isChatOpen() || isThinking) return;
+        var idleMs = Date.now() - lastActivityTs;
+        var roastMs = config.roastDelay || 60000;        // 60s -> Earl roast / Ernest gentle bubble
+        var sleepMs = config.sleepDelay || 300000;       // 5min -> sleeping state
+
+        if (!hasFiredRoast && idleMs >= roastMs && currentMood === 'idle') {
+            hasFiredRoast = true;
+            if (currentPersona === 'earl') {
+                var roasts = PERSONAS.earl.roasts || PERSONAS.earl.idleMessages;
+                speak(pickRandom(roasts), 4000);
+            } else {
                 speak(pickRandom(PERSONAS[currentPersona].idleMessages), 3000);
             }
-        }, config.idleInterval);
+        }
+
+        if (!hasFiredSleep && idleMs >= sleepMs && currentMood === 'idle') {
+            hasFiredSleep = true;
+            setMood('sleeping');
+        }
     }
 
     function resetIdleTimer() {
-        if (config.idleChat) { clearInterval(idleTimer); startIdleTimer(); }
+        noteUserActivity();
     }
 
     function destroy() {
         clearTimeout(bubbleTimer);
         clearInterval(idleTimer);
+        clearInterval(inactivityCheckTimer);
         clearInterval(earlIdleTimer);
         if (widget && widget.parentNode) widget.parentNode.removeChild(widget);
         if (chatEl && chatEl.parentNode) chatEl.parentNode.removeChild(chatEl);
         if (tooltipEl && tooltipEl.parentNode) tooltipEl.parentNode.removeChild(tooltipEl);
         document.removeEventListener('mouseup', handleSelectionEvent);
         document.removeEventListener('touchend', handleSelectionEvent);
+        ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(function (evt) {
+            document.removeEventListener(evt, noteUserActivity);
+        });
         widget = null; chatEl = null; tooltipEl = null;
     }
 
