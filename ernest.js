@@ -190,6 +190,30 @@
         </g>
     </svg>`;
 
+    // Earl is built by substitution from Ernest's SVG so the two stay in sync structurally.
+    // Color palette shifts from cyan/steel to dark green-gray with red accents, eyes narrow, brows angry,
+    // screen shows ERR instead of the 3/STIM readout.
+    const EARL_SVG_TEMPLATE = SVG_TEMPLATE
+        .replace('class="ernest-svg"', 'class="ernest-svg earl-svg"')
+        .replace('fill:#88dded', 'fill:#ff6b6b')                                  // .etc class - labels red
+        .replace(/fill="#55595f"/g, 'fill="#3d4a42"')                             // main body
+        .replace(/fill="#80858b"/g, 'fill="#5a6760"')                             // top cap
+        .replace(/fill="#606469"/g, 'fill="#454f48"')                             // accents
+        .replace(/fill="#666"/g, 'fill="#3e4440"')                                // prong base
+        .replace(/fill="#b0b5ba"/g, 'fill="#8a9088"')                             // prong rods
+        .replace(/fill="#00ff4c"/g, 'fill="#ff3d00"')                             // LED green -> red
+        .replace(/fill="#ff7675"/g, 'fill="#5a1010"')                             // mouth red -> dark
+        .replace(/stroke="#88dded"/g, 'stroke="#ff3d00"')                         // zap lines
+        .replace(/fill="#88dded"/g, 'fill="#ff3d00"')                             // snoring Zs
+        .replace('<ellipse cx="180" cy="285" rx="12" ry="18" fill="#1e1f24"/>', '<ellipse cx="180" cy="287" rx="11" ry="8" fill="#1e1f24"/>')
+        .replace('<ellipse cx="240" cy="285" rx="12" ry="18" fill="#1e1f24"/>', '<ellipse cx="240" cy="287" rx="11" ry="8" fill="#1e1f24"/>')
+        .replace('<path d="M165 260Q180 245 195 250" fill="none" class="eo"/>', '<path d="M163 250Q180 268 197 258" fill="none" class="eo"/>')
+        .replace('<path d="M255 260Q240 245 225 250" fill="none" class="eo"/>', '<path d="M257 250Q240 268 223 258" fill="none" class="eo"/>')
+        .replace('<text x="135" y="172" class="etw" font-size="28">3</text>', '<text x="140" y="174" class="etw" font-size="22" fill="#ff3d00">ERR</text>')
+        .replace('<text x="235" y="170" class="etw" font-size="20">+/-</text>', '<text x="245" y="172" class="etw" font-size="18" fill="#ff3d00">!!</text>')
+        // Mouth: swap the smiling curve for a flat frown
+        .replace('<path d="M185 340Q210 315 235 340C235 365 185 365 185 340Z"', '<path d="M185 340Q210 355 235 340C235 365 185 365 185 340Z"');
+
     const STYLES = `
     <style id="ernest-module-styles">
     /* ===== WIDGET CONTAINER ===== */
@@ -214,6 +238,19 @@
     .ernest-widget.bottom-right { bottom: 20px; right: 20px; }
     .ernest-widget.bottom-left { bottom: 20px; left: 20px; }
     .ernest-widget.inline { position: relative; }
+
+    /* When chat is open, move Ernest to sit beside the panel so he looks like he's talking */
+    .ernest-widget.chat-open.bottom-right { bottom: 20px; right: 420px; }
+    .ernest-widget.chat-open.bottom-left  { bottom: 20px; left: 420px; }
+    @media (max-width: 820px) {
+        /* Not enough horizontal room - perch Ernest on top of the chat panel */
+        .ernest-widget.chat-open.bottom-right,
+        .ernest-widget.chat-open.bottom-left {
+            bottom: calc(70vh + 24px);
+            right: 20px;
+            left: auto;
+        }
+    }
 
     .ernest-char-wrap {
         width: 120px;
@@ -325,6 +362,28 @@
     /* LED pulse */
     .ernest-led { animation: ernest-m-led 2s ease-in-out infinite; }
     @keyframes ernest-m-led { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* Zap lines on prongs - hidden by default, animate only during excited/talking */
+    .ernest-zaps { opacity: 0; }
+    .ernest-zaps path {
+        stroke-dasharray: 60;
+        stroke-dashoffset: 60;
+    }
+    .ernest-excited .ernest-zaps,
+    .ernest-talking .ernest-zaps { opacity: 1; }
+    .ernest-excited .ernest-zaps path,
+    .ernest-talking .ernest-zaps path {
+        animation: ernest-m-zap 1.8s ease-out infinite;
+    }
+    .ernest-excited .ernest-zaps path:nth-child(2),
+    .ernest-talking .ernest-zaps path:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+    @keyframes ernest-m-zap {
+        0%        { stroke-dashoffset: 60; opacity: 0; }
+        10%, 25%  { stroke-dashoffset: 0;  opacity: 1; }
+        35%, 100% { stroke-dashoffset: -60; opacity: 0; }
+    }
 
     /* Snoring Z's (sleeping state) */
     .ernest-zs { opacity: 0; pointer-events:none; }
@@ -1039,14 +1098,18 @@
     function openChat() {
         if (!chatEl) return;
         chatEl.classList.add('open');
-        widget.style.display = 'none';
+        // Keep Ernest visible - move him next to the panel instead of hiding
+        if (widget) {
+            widget.classList.add('chat-open');
+            widget.style.display = '';
+        }
         chatEl.querySelector('.ernest-chat-input').focus();
     }
 
     function closeChat() {
         if (!chatEl) return;
         chatEl.classList.remove('open');
-        widget.style.display = '';
+        if (widget) widget.classList.remove('chat-open');
     }
 
     function isChatOpen() {
@@ -1601,18 +1664,30 @@
             if (title) title.textContent = persona.name;
         }
 
-        // LED and SVG elements
-        var led = widget.querySelector('.ernest-led');
-        if (led) { led.setAttribute('fill', persona.ledColor); led.style.filter = persona.ledGlow; }
-
-        var toggle = widget.querySelector('.ernest-toggle');
-        if (toggle) {
-            toggle.textContent = currentPersona === 'ernest' ? 'E' : 'X';
-            toggle.title = currentPersona === 'ernest' ? 'Switch to Earl' : 'Switch to Ernest';
+        // Swap the entire SVG element so Earl gets his distinct visual (angry brows, narrow eyes,
+        // dark olive body, red LED, ERR screen, frown). The toggle button sits next to the SVG
+        // and must be preserved.
+        var wrap = widget.querySelector('.ernest-char-wrap');
+        if (wrap) {
+            var existingToggle = wrap.querySelector('.ernest-toggle');
+            var toggleHtml = existingToggle ? existingToggle.outerHTML : '<div class="ernest-toggle" title="Switch persona">E</div>';
+            var svgHtml = currentPersona === 'earl' ? EARL_SVG_TEMPLATE : SVG_TEMPLATE;
+            wrap.innerHTML = toggleHtml + svgHtml;
+            // Re-attach click handler to the new toggle
+            var newToggle = wrap.querySelector('.ernest-toggle');
+            if (newToggle) {
+                newToggle.textContent = currentPersona === 'ernest' ? 'E' : 'X';
+                newToggle.title = currentPersona === 'ernest' ? 'Switch to Earl' : 'Switch to Ernest';
+                newToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    switchPersona(currentPersona === 'ernest' ? 'earl' : 'ernest');
+                });
+            }
         }
 
-        var zaps = widget.querySelectorAll('.ernest-zaps path');
-        zaps.forEach(function (z) { z.setAttribute('stroke', persona.accentColor); });
+        // LED fill tweak (redundant after SVG swap but harmless)
+        var led = widget.querySelector('.ernest-led');
+        if (led) { led.style.filter = persona.ledGlow; }
 
         // Update tooltip
         if (tooltipEl) {
