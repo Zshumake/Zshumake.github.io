@@ -703,6 +703,46 @@
     }
     .ernest-api-save:hover { background:rgba(0,230,118,0.2); }
 
+    /* ===== MARKDOWN ELEMENTS IN CHAT ===== */
+    .ernest-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0.5rem 0;
+        font-size: 0.7rem;
+        font-family: 'Inter', sans-serif;
+    }
+    .ernest-table th, .ernest-table td {
+        padding: 0.35rem 0.5rem;
+        border: 1px solid var(--ea-border-light, rgba(136,221,237,0.2));
+        text-align: left;
+    }
+    .ernest-table th {
+        background: var(--ea-subtle, rgba(136,221,237,0.08));
+        color: var(--ea, #88dded);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.62rem;
+        letter-spacing: 0.05em;
+    }
+    .ernest-table td { color: #c0ccda; }
+    .ernest-inline-code {
+        background: var(--ea-dim, rgba(136,221,237,0.15));
+        color: var(--ea, #88dded);
+        padding: 0.1rem 0.35rem;
+        border-radius: 3px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.72rem;
+    }
+    .ernest-h {
+        color: var(--ea, #88dded);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin: 0.6rem 0 0.3rem;
+    }
+
     @media (max-width: 480px) {
         .ernest-chat { width: calc(100vw - 24px); right: 12px; bottom: 12px; max-height: 70vh; }
     }
@@ -1026,13 +1066,106 @@
         if (el) el.remove();
     }
 
+    // ===== MARKDOWN PARSER =====
+    // Order of operations matters: escape, then math symbols, then code (so we don't process inside code),
+    // then tables (block-level), then bold/italic/headings, then newlines.
+    var MATH_SYMBOLS = {
+        '\\\\mu': 'μ', '\\\\alpha': 'α', '\\\\beta': 'β', '\\\\gamma': 'γ',
+        '\\\\delta': 'δ', '\\\\Delta': 'Δ', '\\\\theta': 'θ', '\\\\lambda': 'λ',
+        '\\\\sigma': 'σ', '\\\\omega': 'ω', '\\\\Omega': 'Ω', '\\\\pi': 'π',
+        '\\\\le': '\u2264', '\\\\ge': '\u2265', '\\\\ne': '\u2260',
+        '\\\\pm': '\u00b1', '\\\\times': '\u00d7', '\\\\div': '\u00f7',
+        '\\\\to': '\u2192', '\\\\rightarrow': '\u2192', '\\\\leftarrow': '\u2190',
+        '\\\\infty': '\u221e', '\\\\degrees': '\u00b0'
+    };
+
+    function applyMathSymbols(s) {
+        for (var k in MATH_SYMBOLS) {
+            s = s.replace(new RegExp(k, 'g'), MATH_SYMBOLS[k]);
+        }
+        return s;
+    }
+
+    function isTableSeparator(line) {
+        return /^\s*\|?\s*[-:]+\s*(\|\s*[-:]+\s*)+\|?\s*$/.test(line);
+    }
+
+    function parseTable(lines, startIdx) {
+        // Returns { html, consumed } if a valid table starts at startIdx, else null
+        if (startIdx + 1 >= lines.length) return null;
+        var headerLine = lines[startIdx];
+        var sepLine = lines[startIdx + 1];
+        if (!headerLine.includes('|') || !isTableSeparator(sepLine)) return null;
+
+        var splitRow = function (row) {
+            return row.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(function (c) { return c.trim(); });
+        };
+
+        var headers = splitRow(headerLine);
+        var bodyRows = [];
+        var i = startIdx + 2;
+        while (i < lines.length && lines[i].includes('|') && !isTableSeparator(lines[i])) {
+            bodyRows.push(splitRow(lines[i]));
+            i++;
+        }
+
+        var html = '<table class="ernest-table"><thead><tr>';
+        headers.forEach(function (h) { html += '<th>' + h + '</th>'; });
+        html += '</tr></thead><tbody>';
+        bodyRows.forEach(function (row) {
+            html += '<tr>';
+            row.forEach(function (cell) { html += '<td>' + cell + '</td>'; });
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+        return { html: html, consumed: i - startIdx };
+    }
+
     function formatText(text) {
         var safe = escapeHtml(text);
-        return safe
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/`(.*?)`/g, '<code style="background:rgba(var(--ea-rgb,136,221,237),0.1);padding:0.1rem 0.3rem;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:0.72rem;">$1</code>')
+        safe = applyMathSymbols(safe);
+
+        // Code spans first (so other transforms don't run inside them)
+        safe = safe.replace(/`([^`]+?)`/g, '<code class="ernest-inline-code">$1</code>');
+
+        // Process line-by-line for tables and headings
+        var lines = safe.split('\n');
+        var out = [];
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            // Headings
+            var hMatch = line.match(/^(#{1,3})\s+(.+)$/);
+            if (hMatch) {
+                var level = hMatch[1].length + 2; // ## -> h4, ### -> h5
+                out.push('<h' + level + ' class="ernest-h">' + hMatch[2] + '</h' + level + '>');
+                continue;
+            }
+            // Tables
+            if (line.includes('|')) {
+                var table = parseTable(lines, i);
+                if (table) {
+                    out.push(table.html);
+                    i += table.consumed - 1;
+                    continue;
+                }
+            }
+            out.push(line);
+        }
+        safe = out.join('\n');
+
+        // Inline transforms
+        safe = safe
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*([^*\n]+?)\*/g, '<em>$1</em>')
+            .replace(/_([a-zA-Z0-9+\-]+)/g, '<sub>$1</sub>')
+            .replace(/\^([a-zA-Z0-9+\-]+)/g, '<sup>$1</sup>')
             .replace(/\n/g, '<br>');
+
+        // Tables produce block elements - strip the <br> right after them
+        safe = safe.replace(/<\/table><br>/g, '</table>');
+        safe = safe.replace(/<\/h([4-6])><br>/g, '</h$1>');
+
+        return safe;
     }
 
     // ===== HIGHLIGHT TOOLTIP =====
