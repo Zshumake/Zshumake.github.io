@@ -298,6 +298,71 @@
         100% { transform: translate(20px,-50px) scale(1.2); opacity:0; }
     }
 
+    /* ===== EARL'S UNIQUE IDLE ANIMATIONS =====
+       Earl gets 6 distinct micro-behaviors that cycle randomly while idle.
+       Each one has a different personality flavor. */
+
+    /* 1. Glitch & Sigh - jittery then dramatic drop */
+    .earl-glitch-sigh .ernest-svg { animation: earl-m-glitch-sigh 6s ease-in-out infinite; }
+    @keyframes earl-m-glitch-sigh {
+        0%,5%,10% { transform: translate(0,0); }
+        1%,3%,7%,9% { transform: translate(-3px,1px) rotate(-1deg); }
+        2%,4%,8% { transform: translate(3px,-1px) rotate(1deg); }
+        15% { transform: translateY(15px) rotate(0); }
+        40% { transform: translateY(15px); }
+        70%,100% { transform: translateY(0); }
+    }
+
+    /* 2. Angry Scan - tilt left, tilt right, slam */
+    .earl-angry-scan .ernest-svg { animation: earl-m-angry-scan 5s ease-in-out infinite; }
+    @keyframes earl-m-angry-scan {
+        0%,10%,100% { transform: rotate(0) translateY(0); }
+        20%,35% { transform: rotate(-12deg) translateY(3px); }
+        45%,60% { transform: rotate(12deg) translateY(3px); }
+        70% { transform: rotate(0) translateY(-10px); }
+        75% { transform: rotate(0) translateY(13px); }
+        85% { transform: rotate(0) translateY(0); }
+    }
+
+    /* 3. Engine Stall - sputter and drop */
+    .earl-engine-stall .ernest-svg { animation: earl-m-engine-stall 7s ease-in-out infinite; }
+    @keyframes earl-m-engine-stall {
+        0%,10%,100% { transform: translateY(0); }
+        15% { transform: translateY(-20px); }
+        20%,25%,30%,35% { transform: translateY(-20px) rotate(-2deg); }
+        22%,27%,32% { transform: translateY(-19px) rotate(2deg); }
+        40% { transform: translateY(18px); }
+        55% { transform: translateY(0); }
+    }
+
+    /* 4. Impatient Hop - tilted corner-hops */
+    .earl-impatient-hop .ernest-svg { animation: earl-m-impatient-hop 4s ease-in-out infinite; transform-origin: bottom right; }
+    @keyframes earl-m-impatient-hop {
+        0%,10%,100% { transform: rotate(0) translateY(0); }
+        20% { transform: rotate(5deg) translateY(0); }
+        25%,35%,45% { transform: rotate(5deg) translateY(-5px); }
+        30%,40%,50% { transform: rotate(5deg) translateY(0); }
+        60% { transform: rotate(0) translateY(0); }
+    }
+
+    /* 5. Power Surge - squash, stretch, jolt */
+    .earl-power-surge .ernest-svg { animation: earl-m-power-surge 6s ease-in-out infinite; }
+    @keyframes earl-m-power-surge {
+        0%,10%,100% { transform: scaleX(1) scaleY(1) translateY(0); opacity:1; }
+        30% { transform: scaleX(1.1) scaleY(0.8) translateY(10px); opacity:0.8; }
+        35% { transform: scaleX(0.8) scaleY(1.3) translateY(-15px); opacity:1; }
+        45% { transform: scaleX(1) scaleY(1) translateY(0); }
+    }
+
+    /* 6. Slow Burn - lean in close, snap back */
+    .earl-slow-burn .ernest-svg { animation: earl-m-slow-burn 8s ease-in-out infinite; }
+    @keyframes earl-m-slow-burn {
+        0%,10%,100% { transform: translateY(0) scale(1); }
+        50% { transform: scale(1.15) translateY(5px); }
+        55% { transform: scale(1) translateY(-3px); }
+        60% { transform: scale(1) translateY(0); }
+    }
+
     /* Reduced motion - respect user preference */
     @media (prefers-reduced-motion: reduce) {
         .ernest-svg, .ernest-svg * { animation: none !important; }
@@ -1177,6 +1242,34 @@
         resetIdleTimer();
     }
 
+    var EARL_IDLE_VARIANTS = ['earl-glitch-sigh', 'earl-angry-scan', 'earl-engine-stall', 'earl-impatient-hop', 'earl-power-surge', 'earl-slow-burn'];
+    var earlIdleTimer = null;
+
+    function applyEarlIdleVariant() {
+        if (!widget || currentPersona !== 'earl' || currentMood !== 'idle') return;
+        var wrap = widget.querySelector('.ernest-char-wrap');
+        // Strip any existing earl-* classes
+        wrap.className = wrap.className.replace(/\bearl-[a-z-]+\b/g, '').trim();
+        wrap.classList.add(pickRandom(EARL_IDLE_VARIANTS));
+    }
+
+    function startEarlIdleCycle() {
+        clearInterval(earlIdleTimer);
+        if (currentPersona !== 'earl') return;
+        applyEarlIdleVariant();
+        // Cycle through Earl's micro-behaviors every 8s
+        earlIdleTimer = setInterval(applyEarlIdleVariant, 8000);
+    }
+
+    function stopEarlIdleCycle() {
+        clearInterval(earlIdleTimer);
+        earlIdleTimer = null;
+        if (widget) {
+            var wrap = widget.querySelector('.ernest-char-wrap');
+            if (wrap) wrap.className = wrap.className.replace(/\bearl-[a-z-]+\b/g, '').trim();
+        }
+    }
+
     function setMood(mood) {
         if (!widget) return;
         currentMood = mood;
@@ -1184,6 +1277,12 @@
         wrap.className = 'ernest-char-wrap ernest-' + mood;
         wrap.style.width = config.size + 'px';
         wrap.style.height = (config.size * 1.17) + 'px';
+        // Earl's idle cycling kicks in only when idle and persona is earl
+        if (currentPersona === 'earl' && mood === 'idle') {
+            startEarlIdleCycle();
+        } else {
+            stopEarlIdleCycle();
+        }
     }
 
     function switchPersona(persona) {
@@ -1277,6 +1376,7 @@
     function destroy() {
         clearTimeout(bubbleTimer);
         clearInterval(idleTimer);
+        clearInterval(earlIdleTimer);
         if (widget && widget.parentNode) widget.parentNode.removeChild(widget);
         if (chatEl && chatEl.parentNode) chatEl.parentNode.removeChild(chatEl);
         if (tooltipEl && tooltipEl.parentNode) tooltipEl.parentNode.removeChild(tooltipEl);
