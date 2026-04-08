@@ -1003,6 +1003,22 @@
             }
         });
 
+        // Easter egg: click the chat title 7 times within 2 seconds per click to swap persona
+        var titleEl = chatEl.querySelector('.ernest-chat-title');
+        var eggCount = 0;
+        var eggTimer = null;
+        titleEl.style.cursor = 'pointer';
+        titleEl.style.userSelect = 'none';
+        titleEl.addEventListener('click', function () {
+            eggCount++;
+            if (eggCount >= 7) {
+                switchPersona(currentPersona === 'ernest' ? 'earl' : 'ernest');
+                eggCount = 0;
+            }
+            clearTimeout(eggTimer);
+            eggTimer = setTimeout(function () { eggCount = 0; }, 2000);
+        });
+
         // API key save
         var apiSave = chatEl.querySelector('.ernest-api-save');
         if (apiSave) {
@@ -1313,7 +1329,37 @@
         }
     }
 
-    async function callGemini(query) {
+    // ===== MODEL AUTO-DISCOVERY =====
+    // Queries the models list endpoint and returns the first usable flash model.
+    // Cached in localStorage so we only probe once per session.
+    async function discoverWorkingModel() {
+        if (!apiKey) return null;
+        var cached = localStorage.getItem('ernest-gemini-model');
+        if (cached) return cached;
+        try {
+            var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + apiKey);
+            if (!res.ok) return null;
+            var data = await res.json();
+            var models = (data.models || []).map(function (m) { return (m.name || '').replace('models/', ''); });
+            // Priority order - prefer flash for speed + cost
+            var preferred = ['gemini-2.0-flash', 'gemini-2.0-flash-001', 'gemini-1.5-flash-latest', 'gemini-1.5-flash', 'gemini-flash-latest'];
+            for (var i = 0; i < preferred.length; i++) {
+                if (models.indexOf(preferred[i]) !== -1) {
+                    localStorage.setItem('ernest-gemini-model', preferred[i]);
+                    return preferred[i];
+                }
+            }
+            // Fall back to any flash or gemini model
+            var fallback = models.find(function (m) { return m.indexOf('flash') !== -1; }) || models.find(function (m) { return m.indexOf('gemini') !== -1; });
+            if (fallback) {
+                localStorage.setItem('ernest-gemini-model', fallback);
+                return fallback;
+            }
+        } catch (e) { /* swallow - return null to indicate discovery failed */ }
+        return null;
+    }
+
+    async function callGemini(query, _isRetry) {
         if (!apiKey) {
             addChatMessage('assistant', 'I need an API key to answer. Click the setup area at the top of this chat to add your Gemini key.');
             return;
@@ -1327,7 +1373,8 @@
         sendBtn.disabled = true;
 
         var persona = PERSONAS[currentPersona];
-        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + config.geminiModel + ':streamGenerateContent?alt=sse&key=' + apiKey;
+        var modelName = localStorage.getItem('ernest-gemini-model') || config.geminiModel;
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent?alt=sse&key=' + apiKey;
 
         // Build system prompt: persona + page context (if any)
         var fullSystemPrompt = persona.systemPrompt;
@@ -1404,6 +1451,26 @@
             removeLoadingMessage();
             var streamEl = document.getElementById('ernest-streaming');
             if (streamEl) streamEl.remove();
+
+            // If this looks like a model-not-found or bad-model error AND we haven't retried,
+            // try auto-discovering a working model and retry once.
+            var looksLikeModelError = !_isRetry && /model|not found|404|unsupported/i.test(e.message || '');
+            if (looksLikeModelError) {
+                localStorage.removeItem('ernest-gemini-model');
+                var newModel = await discoverWorkingModel();
+                if (newModel && newModel !== modelName) {
+                    addChatMessage('assistant', (currentPersona === 'earl' ? 'The model you gave me is dead. Switching to ' : 'Switching to ') + newModel + '. Retrying...');
+                    // Clean up state before recursive call
+                    if (widget) {
+                        var wrapErr = widget.querySelector('.ernest-char-wrap');
+                        if (wrapErr) wrapErr.classList.remove('ernest-talking');
+                    }
+                    isThinking = false;
+                    sendBtn.disabled = false;
+                    return callGemini(query, true);
+                }
+            }
+
             var errMsg = currentPersona === 'earl'
                 ? 'Connection severed. Check your API key or Wi-Fi. Error: ' + e.message
                 : 'Signal lost! Error: ' + e.message;
